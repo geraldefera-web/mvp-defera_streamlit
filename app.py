@@ -1,184 +1,373 @@
-import streamlit as st
+import io
+from datetime import date
+
 import pandas as pd
+import streamlit as st
 
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="DEFERA Stats Live", layout="wide")
 
-# -------------------------
-# PLANTÉIS
-# -------------------------
+EQUIPAS = {
+    "Sénior": [
+        {"numero": 1, "nome": "Nuno Pinheiro", "gr": False},
+        {"numero": 2, "nome": "Armando Araujo", "gr": False},
+        {"numero": 3, "nome": "João Leite", "gr": False},
+        {"numero": 4, "nome": "César Gonçalves", "gr": False},
+        {"numero": 5, "nome": "Roberto Ferreira", "gr": False},
+        {"numero": 6, "nome": "Pedro Freitas", "gr": False},
+        {"numero": 7, "nome": "Gabriel Guimarães", "gr": False},
+        {"numero": 8, "nome": "Raphael Neto", "gr": False},
+        {"numero": 9, "nome": "José Magalhães", "gr": False},
+        {"numero": 10, "nome": "José Martins", "gr": True},
+        {"numero": 11, "nome": "João Martins", "gr": False},
+        {"numero": 12, "nome": "André Silva", "gr": False},
+        {"numero": 13, "nome": "Leonardo Pereira", "gr": True},
+        {"numero": 14, "nome": "Alexandr Tchikoulaev", "gr": False},
+        {"numero": 15, "nome": "José Araújo", "gr": False},
+        {"numero": 16, "nome": "Diogo Martins", "gr": False},
+    ],
+    "Sub-14": [
+        {"numero": 1, "nome": "Fernando Abreu", "gr": False},
+        {"numero": 2, "nome": "David Ramalho", "gr": False},
+        {"numero": 3, "nome": "Duarte Silva", "gr": False},
+        {"numero": 4, "nome": "Francisco Fonseca", "gr": False},
+        {"numero": 5, "nome": "Fábio Faria", "gr": False},
+        {"numero": 6, "nome": "João Edu Oliveira", "gr": False},
+        {"numero": 7, "nome": "José Lameiras", "gr": False},
+        {"numero": 8, "nome": "Lourenço Pinto", "gr": False},
+        {"numero": 9, "nome": "Afonso Eusébio", "gr": False},
+        {"numero": 10, "nome": "Afonso Sousa", "gr": False},
+        {"numero": 11, "nome": "Alexandre Teixeira", "gr": False},
+        {"numero": 12, "nome": "Duarte Oliveira", "gr": False},
+        {"numero": 13, "nome": "Gabriel Oliveira", "gr": False},
+        {"numero": 14, "nome": "Francisco Pedro", "gr": False},
+        {"numero": 15, "nome": "Francisco Soares", "gr": False},
+        {"numero": 16, "nome": "Tomás Marinho", "gr": False},
+        {"numero": 17, "nome": "Francisco Costa", "gr": False},
+        {"numero": 18, "nome": "Pedro Martins", "gr": False},
+        {"numero": 19, "nome": "José Fernandes", "gr": True},
+        {"numero": 20, "nome": "Diogo Sousa", "gr": True},
+        {"numero": 21, "nome": "Gabriel Silva", "gr": False},
+        {"numero": 22, "nome": "Rodrigo Castro", "gr": False},
+        {"numero": 23, "nome": "Afonso Cunha", "gr": True},
+        {"numero": 24, "nome": "Salvador Correia", "gr": False},
+        {"numero": 25, "nome": "Rodrigo Sanchez", "gr": False},
+    ],
+}
 
-plantel_senior = [
-    "Nuno Pinheiro","Armando Araujo","João Leite","César Gonçalves",
-    "Roberto Ferreira","Pedro Freitas","Gabriel Guimarães","Raphael Neto",
-    "José Magalhães","José Martins (GR)","João Martins","André Silva",
-    "Leonardo Pereira (GR)","Alexandr Tchikoulaev","José Araújo","Diogo Martins"
+CAMPOS_EVENTOS = {
+    "Golo": "golos",
+    "Assistência": "assistencias",
+    "Remate Falhado": "remates_falhados",
+    "Perda de Bola": "perdas_bola",
+    "Recuperação de Bola": "recuperacoes_bola",
+    "Exclusão 2 min": "exclusoes_2min",
+    "Cartão Amarelo": "cartoes_amarelos",
+    "Cartão Vermelho": "cartoes_vermelhos",
+    "Defesa GR": "defesas_gr",
+}
+
+EVENTOS_JOGADOR = [
+    "Golo",
+    "Assistência",
+    "Remate Falhado",
+    "Perda de Bola",
+    "Recuperação de Bola",
+    "Exclusão 2 min",
+    "Cartão Amarelo",
+    "Cartão Vermelho",
 ]
+EVENTOS_GR = EVENTOS_JOGADOR + ["Defesa GR"]
 
-plantel_sub14 = [
-    "Fernando Abreu","David Ramalho","Duarte Silva","Francisco Fonseca",
-    "Fábio Faria","João Edu Oliveira","José Lameiras","Lourenço Pinto",
-    "Afonso Eusébio","Afonso Sousa","Alexandre Teixeira","Duarte Oliveira",
-    "Gabriel Oliveira","Francisco Pedro","Francisco Soares","Tomás Marinho",
-    "Francisco Costa","Pedro Martins","José Fernandes (GR)",
-    "Diogo Sousa (GR)","Gabriel Silva","Rodrigo Castro",
-    "Afonso Cunha (GR)","Salvador Correia","Rodrigo Sanchez"
-]
 
-# -------------------------
-# SESSION STATE
-# -------------------------
+def init_state():
+    defaults = {
+        "jogo_iniciado": False,
+        "parte": "1.ª Parte",
+        "equipa": None,
+        "adversario": "",
+        "competicao": "",
+        "local_jogo": "",
+        "data_jogo": date.today(),
+        "convocados_ids": [],
+        "selecionado_id": None,
+        "eventos_log": [],
+        "stats": {},
+        "resultado_cd_xico": 0,
+        "resultado_adversario": 0,
+        "resultado_intervalo_cd_xico": 0,
+        "resultado_intervalo_adversario": 0,
+        "observacoes": "",
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-if "jogo_iniciado" not in st.session_state:
-    st.session_state.jogo_iniciado = False
-    st.session_state.parte = None
-    st.session_state.eventos = []
-    st.session_state.stats = {}
-    st.session_state.atleta_atual = None
-    st.session_state.ultimos = []
 
-# -------------------------
-# SETUP JOGO
-# -------------------------
+def reset_jogo():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    init_state()
+
+
+def get_plantel(equipa_nome):
+    return EQUIPAS.get(equipa_nome, [])
+
+
+def get_convocados():
+    return sorted(
+        [j for j in get_plantel(st.session_state.equipa) if j["numero"] in st.session_state.convocados_ids],
+        key=lambda x: x["numero"],
+    )
+
+
+def get_player_by_num(numero):
+    for jogador in get_convocados():
+        if jogador["numero"] == numero:
+            return jogador
+    return None
+
+
+def short_name(nome):
+    partes = nome.split()
+    if len(partes) <= 2:
+        return nome
+    return f"{partes[0]} {partes[-1]}"
+
+
+def ensure_player_stats(jogador):
+    pid = jogador["numero"]
+    if pid not in st.session_state.stats:
+        st.session_state.stats[pid] = {
+            "numero": jogador["numero"],
+            "atleta": jogador["nome"],
+            "gr": jogador["gr"],
+            "golos": 0,
+            "assistencias": 0,
+            "remates_falhados": 0,
+            "perdas_bola": 0,
+            "recuperacoes_bola": 0,
+            "exclusoes_2min": 0,
+            "cartoes_amarelos": 0,
+            "cartoes_vermelhos": 0,
+            "defesas_gr": 0,
+            "golos_1p": 0,
+            "golos_2p": 0,
+        }
+
+
+def registar_evento(numero, evento):
+    jogador = get_player_by_num(numero)
+    if not jogador:
+        return
+    ensure_player_stats(jogador)
+    campo = CAMPOS_EVENTOS[evento]
+    st.session_state.stats[numero][campo] += 1
+    if evento == "Golo":
+        if st.session_state.parte == "1.ª Parte":
+            st.session_state.stats[numero]["golos_1p"] += 1
+        else:
+            st.session_state.stats[numero]["golos_2p"] += 1
+    st.session_state.eventos_log.append(
+        {"parte": st.session_state.parte, "numero": jogador["numero"], "atleta": jogador["nome"], "evento": evento}
+    )
+    st.session_state.selecionado_id = numero
+
+
+def anular_ultima_acao():
+    if not st.session_state.eventos_log:
+        return
+    ultimo = st.session_state.eventos_log.pop()
+    numero = ultimo["numero"]
+    evento = ultimo["evento"]
+    campo = CAMPOS_EVENTOS[evento]
+    if numero in st.session_state.stats and st.session_state.stats[numero][campo] > 0:
+        st.session_state.stats[numero][campo] -= 1
+        if evento == "Golo":
+            if ultimo["parte"] == "1.ª Parte" and st.session_state.stats[numero]["golos_1p"] > 0:
+                st.session_state.stats[numero]["golos_1p"] -= 1
+            if ultimo["parte"] == "2.ª Parte" and st.session_state.stats[numero]["golos_2p"] > 0:
+                st.session_state.stats[numero]["golos_2p"] -= 1
+
+
+def dataframe_resumo():
+    rows = []
+    for jogador in get_convocados():
+        ensure_player_stats(jogador)
+        rows.append(st.session_state.stats[jogador["numero"]])
+    if not rows:
+        return pd.DataFrame()
+    return pd.DataFrame(rows)[[
+        "numero", "atleta", "golos", "assistencias", "remates_falhados", "perdas_bola",
+        "recuperacoes_bola", "exclusoes_2min", "cartoes_amarelos", "cartoes_vermelhos",
+        "defesas_gr", "golos_1p", "golos_2p"
+    ]].sort_values(["numero", "atleta"])
+
+
+def dataframe_eventos():
+    if not st.session_state.eventos_log:
+        return pd.DataFrame(columns=["parte", "numero", "atleta", "evento"])
+    return pd.DataFrame(st.session_state.eventos_log)
+
+
+def ficha_jogo_df():
+    return pd.DataFrame([{
+        "equipa": st.session_state.equipa,
+        "adversario": st.session_state.adversario,
+        "competicao": st.session_state.competicao,
+        "local_jogo": st.session_state.local_jogo,
+        "data_jogo": st.session_state.data_jogo,
+        "resultado_cd_xico": st.session_state.resultado_cd_xico,
+        "resultado_adversario": st.session_state.resultado_adversario,
+        "resultado_intervalo_cd_xico": st.session_state.resultado_intervalo_cd_xico,
+        "resultado_intervalo_adversario": st.session_state.resultado_intervalo_adversario,
+        "observacoes": st.session_state.observacoes,
+    }])
+
+
+def exportar_excel_bytes():
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        ficha_jogo_df().to_excel(writer, sheet_name="Ficha do Jogo", index=False)
+        dataframe_resumo().to_excel(writer, sheet_name="Resumo por Atleta", index=False)
+        dataframe_eventos().to_excel(writer, sheet_name="Log de Eventos", index=False)
+    output.seek(0)
+    return output.getvalue()
+
+
+init_state()
 
 st.title("DEFERA Stats Live")
+st.caption("Primeiro toca-se no atleta. Depois regista-se a ação.")
 
 if not st.session_state.jogo_iniciado:
-
-    equipa = st.selectbox("Equipa", ["Sénior","Sub-14"])
+    st.subheader("Configuração do jogo")
+    equipa = st.selectbox("Equipa", list(EQUIPAS.keys()))
     adversario = st.text_input("Adversário")
     competicao = st.text_input("Competição")
+    local_jogo = st.text_input("Local")
+    data_jogo = st.date_input("Data do jogo", value=date.today())
 
-    plantel = plantel_senior if equipa == "Sénior" else plantel_sub14
+    plantel = get_plantel(equipa)
+    st.markdown("#### Convocados")
+    opcoes = {f"{j['numero']} · {j['nome']}{' 🧤' if j['gr'] else ''}": j["numero"] for j in plantel}
+    labels = st.multiselect("Selecionar atletas", list(opcoes.keys()))
+    convocados_ids = [opcoes[label] for label in labels]
 
-    convocados = st.multiselect("Convocados", plantel)
-
-    if st.button("Iniciar Jogo"):
-        st.session_state.jogo_iniciado = True
-        st.session_state.equipa = equipa
-        st.session_state.convocados = convocados
-        st.session_state.parte = "1ª Parte"
-
-        for jogador in convocados:
-            st.session_state.stats[jogador] = {
-                "golos":0,"assist":0,"remates":0,"perdas":0,
-                "recuperacoes":0,"exclusoes":0,"amarelos":0,
-                "vermelhos":0,"defesas":0
-            }
-
-        st.session_state.atleta_atual = convocados[0] if convocados else None
-
+    if st.button("Iniciar jogo", use_container_width=True):
+        if not adversario.strip():
+            st.warning("Preenche o adversário.")
+        elif not convocados_ids:
+            st.warning("Seleciona os convocados.")
+        else:
+            st.session_state.jogo_iniciado = True
+            st.session_state.equipa = equipa
+            st.session_state.adversario = adversario.strip()
+            st.session_state.competicao = competicao.strip()
+            st.session_state.local_jogo = local_jogo.strip()
+            st.session_state.data_jogo = data_jogo
+            st.session_state.convocados_ids = convocados_ids
+            st.session_state.selecionado_id = sorted(convocados_ids)[0]
+            st.rerun()
     st.stop()
 
-# -------------------------
-# NAVEGAÇÃO ATLETA
-# -------------------------
+m1, m2, m3 = st.columns(3)
+with m1:
+    st.metric("Parte", st.session_state.parte)
+with m2:
+    st.metric("CD Xico", st.session_state.resultado_cd_xico)
+with m3:
+    st.metric("Adversário", st.session_state.resultado_adversario)
 
-st.subheader(f"{st.session_state.parte}")
+c1, c2, c3 = st.columns(3)
+with c1:
+    if st.button("Passar para 2.ª Parte", use_container_width=True, disabled=st.session_state.parte == "2.ª Parte"):
+        st.session_state.parte = "2.ª Parte"
+        st.rerun()
+with c2:
+    if st.button("Anular última ação", use_container_width=True):
+        anular_ultima_acao()
+        st.rerun()
+with c3:
+    if st.button("Novo jogo", use_container_width=True):
+        reset_jogo()
+        st.rerun()
 
-col1, col2, col3 = st.columns([1,2,1])
+st.markdown("### Atletas convocados")
+st.caption("Toca no atleta para abrir as ações.")
 
-with col1:
-    if st.button("⬅️"):
-        idx = st.session_state.convocados.index(st.session_state.atleta_atual)
-        st.session_state.atleta_atual = st.session_state.convocados[max(0, idx-1)]
+convocados = get_convocados()
+campo = [j for j in convocados if not j["gr"]]
+grs = [j for j in convocados if j["gr"]]
 
-with col3:
-    if st.button("➡️"):
-        idx = st.session_state.convocados.index(st.session_state.atleta_atual)
-        st.session_state.atleta_atual = st.session_state.convocados[min(len(st.session_state.convocados)-1, idx+1)]
+def render_grid(jogadores, prefix):
+    for i in range(0, len(jogadores), 2):
+        cols = st.columns(2)
+        for idx, jogador in enumerate(jogadores[i:i+2]):
+            selecionado = st.session_state.selecionado_id == jogador["numero"]
+            label = f"{jogador['numero']} · {short_name(jogador['nome'])}"
+            if jogador["gr"]:
+                label += " 🧤"
+            if selecionado:
+                label = "✅ " + label
+            with cols[idx]:
+                if st.button(label, key=f"{prefix}_{jogador['numero']}", use_container_width=True):
+                    st.session_state.selecionado_id = jogador["numero"]
+                    st.rerun()
 
-with col2:
-    atleta = st.selectbox("Atleta", st.session_state.convocados, index=st.session_state.convocados.index(st.session_state.atleta_atual))
-    st.session_state.atleta_atual = atleta
+if campo:
+    st.markdown("#### Jogadores de campo")
+    render_grid(campo, "campo")
+if grs:
+    st.markdown("#### Guarda-redes")
+    render_grid(grs, "gr")
 
-# -------------------------
-# FUNÇÃO REGISTO
-# -------------------------
+selecionado = get_player_by_num(st.session_state.selecionado_id)
 
-def registar(evento):
-    atleta = st.session_state.atleta_atual
+st.divider()
+st.markdown("### Ações do atleta selecionado")
 
-    if evento == "golo":
-        st.session_state.stats[atleta]["golos"] += 1
-    elif evento == "assist":
-        st.session_state.stats[atleta]["assist"] += 1
-    elif evento == "remate":
-        st.session_state.stats[atleta]["remates"] += 1
-    elif evento == "perda":
-        st.session_state.stats[atleta]["perdas"] += 1
-    elif evento == "rec":
-        st.session_state.stats[atleta]["recuperacoes"] += 1
-    elif evento == "2min":
-        st.session_state.stats[atleta]["exclusoes"] += 1
-    elif evento == "am":
-        st.session_state.stats[atleta]["amarelos"] += 1
-    elif evento == "vm":
-        st.session_state.stats[atleta]["vermelhos"] += 1
-    elif evento == "def":
-        st.session_state.stats[atleta]["defesas"] += 1
+if selecionado:
+    st.subheader(f"{selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}")
+    eventos = EVENTOS_GR if selecionado["gr"] else EVENTOS_JOGADOR
+    for i in range(0, len(eventos), 2):
+        cols = st.columns(2)
+        for idx, evento in enumerate(eventos[i:i+2]):
+            with cols[idx]:
+                if st.button(evento, key=f"evento_{selecionado['numero']}_{evento}", use_container_width=True):
+                    registar_evento(selecionado["numero"], evento)
+                    st.rerun()
+else:
+    st.info("Seleciona um atleta.")
 
-    st.session_state.ultimos.insert(0, atleta)
-    st.session_state.ultimos = st.session_state.ultimos[:5]
+st.divider()
+st.markdown("### Fecho do jogo")
 
-# -------------------------
-# BOTÕES RÁPIDOS
-# -------------------------
+r1, r2 = st.columns(2)
+with r1:
+    st.session_state.resultado_cd_xico = st.number_input("Resultado final CD Xico", min_value=0, step=1, value=int(st.session_state.resultado_cd_xico))
+with r2:
+    st.session_state.resultado_adversario = st.number_input("Resultado final adversário", min_value=0, step=1, value=int(st.session_state.resultado_adversario))
 
-st.markdown("### Ações")
+r3, r4 = st.columns(2)
+with r3:
+    st.session_state.resultado_intervalo_cd_xico = st.number_input("Resultado ao intervalo CD Xico", min_value=0, step=1, value=int(st.session_state.resultado_intervalo_cd_xico))
+with r4:
+    st.session_state.resultado_intervalo_adversario = st.number_input("Resultado ao intervalo adversário", min_value=0, step=1, value=int(st.session_state.resultado_intervalo_adversario))
 
-colA, colB = st.columns(2)
+st.session_state.observacoes = st.text_area("Observações finais", value=st.session_state.observacoes)
 
-with colA:
-    st.button("⚽ Golo", on_click=registar, args=("golo",))
-    st.button("🎯 Assistência", on_click=registar, args=("assist",))
-    st.button("❌ Remate Falhado", on_click=registar, args=("remate",))
-    st.button("🔴 Perda", on_click=registar, args=("perda",))
+st.divider()
+st.markdown("### Resumo estatístico")
+st.dataframe(dataframe_resumo(), use_container_width=True, hide_index=True)
 
-with colB:
-    st.button("🟢 Recuperação", on_click=registar, args=("rec",))
-    st.button("⏱ 2min", on_click=registar, args=("2min",))
-    st.button("🟨 Amarelo", on_click=registar, args=("am",))
-    st.button("🟥 Vermelho", on_click=registar, args=("vm",))
+if not dataframe_eventos().empty:
+    with st.expander("Ver últimas ações"):
+        st.dataframe(dataframe_eventos().tail(20).iloc[::-1], use_container_width=True, hide_index=True)
 
-if "(GR)" in atleta:
-    st.button("🧤 Defesa GR", on_click=registar, args=("def",))
-
-# -------------------------
-# ATALHOS RÁPIDOS
-# -------------------------
-
-if st.session_state.ultimos:
-    st.markdown("### Atalhos")
-    for nome in st.session_state.ultimos:
-        if st.button(nome):
-            st.session_state.atleta_atual = nome
-
-# -------------------------
-# TROCA DE PARTE
-# -------------------------
-
-if st.button("➡️ Ir para 2ª Parte"):
-    st.session_state.parte = "2ª Parte"
-
-# -------------------------
-# RESUMO
-# -------------------------
-
-df = pd.DataFrame(st.session_state.stats).T
-st.dataframe(df)
-
-# -------------------------
-# FINAL DO JOGO
-# -------------------------
-
-st.markdown("### Final do Jogo")
-
-res_cdx = st.number_input("CD Xico", step=1)
-res_adv = st.number_input("Adversário", step=1)
-
-if st.button("Exportar Excel"):
-    df.to_excel("jogo.xlsx")
-    with open("jogo.xlsx","rb") as f:
-        st.download_button("Download", f, file_name="jogo.xlsx")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+st.download_button(
+    "Exportar Excel do jogo",
+    data=exportar_excel_bytes(),
+    file_name=f"defera_stats_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True,
+)
