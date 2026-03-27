@@ -180,5 +180,5 @@ if st.button("Exportar Excel"):
     df.to_excel("jogo.xlsx")
     with open("jogo.xlsx","rb") as f:
         st.download_button("Download", f, file_name="jogo.xlsx")
-        )
+        
         st.markdown("</div>", unsafe_allow_html=True)
