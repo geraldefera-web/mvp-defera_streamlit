@@ -189,7 +189,6 @@ EQUIPAS = {
         {"numero": 7, "nome": "César Gonçalves", "gr": False},
         {"numero": 5, "nome": "Roberto Ferreira", "gr": False},
         {"numero": 28, "nome": "Pedro Freitas", "gr": False},
-        {"numero": 7, "nome": "Gabriel Guimarães", "gr": False},
         {"numero": 77, "nome": "Raphael Cancino", "gr": False},
         {"numero": 3, "nome": "José Magalhães", "gr": False},
         {"numero": 99, "nome": "José Martins", "gr": True},
