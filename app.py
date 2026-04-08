@@ -126,13 +126,21 @@ st.markdown(
         }}
 
         .action-grid .stButton > button {{
-            min-height: 2.15rem !important;
-            padding: 0.22rem 0.32rem !important;
-            font-size: 0.80rem !important;
+            min-height: 2.45rem !important;
+            padding: 0.25rem 0.30rem !important;
+            font-size: 0.76rem !important;
             border-radius: 8px !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
+            line-height: 1.05 !important;
+            white-space: pre-line !important;
+        }}
+
+        .zone-grid .stButton > button {{
+            min-height: 4.35rem !important;
+            padding: 0.28rem 0.22rem !important;
+            font-size: 0.66rem !important;
+            border-radius: 8px !important;
+            line-height: 1.05 !important;
+            white-space: pre-line !important;
         }}
 
         .selected-athlete-fixed {{
@@ -145,19 +153,6 @@ st.markdown(
             position: sticky;
             top: 0.25rem;
             z-index: 10;
-        }}
-
-        .section-card {{
-            background: {DEFERA_PANEL};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 12px;
-        }}
-
-        .zone-selected {{
-            border: 2px solid white !important;
-            box-shadow: 0 0 0 1px white inset !important;
         }}
 
         @media (max-width: 768px) {{
@@ -177,9 +172,16 @@ st.markdown(
             }}
 
             .action-grid .stButton > button {{
-                min-height: 2.05rem !important;
-                font-size: 0.76rem !important;
-                padding: 0.18rem 0.26rem !important;
+                min-height: 2.15rem !important;
+                font-size: 0.73rem !important;
+                padding: 0.18rem 0.24rem !important;
+            }}
+
+            .zone-grid .stButton > button {{
+                min-height: 4.55rem !important;
+                font-size: 0.60rem !important;
+                padding: 0.22rem 0.12rem !important;
+                line-height: 1.0 !important;
             }}
         }}
     </style>
@@ -259,15 +261,15 @@ RESULTADOS_REMATE = [
 ]
 
 ZONAS_BALIZA = {
-    1: "Sup. Esq.",
-    2: "Sup. Centro",
-    3: "Sup. Dir.",
-    4: "Meio Esq.",
+    1: "Canto Superior Esquerdo",
+    2: "Centro Superior",
+    3: "Canto Superior Direito",
+    4: "Meio Esquerda",
     5: "Meio Centro",
-    6: "Meio Dir.",
-    7: "Inf. Esq.",
-    8: "Inf. Centro",
-    9: "Inf. Dir.",
+    6: "Meio Direita",
+    7: "Canto Inferior Esquerdo",
+    8: "Centro Inferior",
+    9: "Canto Inferior Direito",
 }
 
 # =========================================================
@@ -431,7 +433,7 @@ def confirmar_registo_remate():
     )
 
     st.session_state.ultima_acao_registada = (
-        f"{jogador['numero']} · {jogador['nome']} → {tipo} / {resultado} / Zona {zona}"
+        f"{jogador['numero']} · {jogador['nome']} → {tipo} / {resultado} / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}"
     )
     st.session_state.ultima_acao_anulada = ""
     limpar_selecao_remate()
@@ -482,7 +484,7 @@ def anular_ultima_acao():
 
     st.session_state.ultima_acao_anulada = (
         f"Ação anulada: {ultimo['numero_camisola']} · {ultimo['atleta']} → "
-        f"{ultimo['tipo_remate']} / {ultimo['resultado_remate']} / Zona {ultimo['zona_baliza']}"
+        f"{ultimo['tipo_remate']} / {ultimo['resultado_remate']} / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
     )
     st.session_state.ultima_acao_registada = ""
     limpar_selecao_remate()
@@ -533,7 +535,11 @@ def render_grelha_zonas():
         for c in cols:
             zona = zonas[idx]
             selecionado = st.session_state.zona_baliza_atual == zona
-            label = f"✅ {zona}" if selecionado else str(zona)
+
+            label = f"{zona}\n{ZONAS_BALIZA[zona]}"
+            if selecionado:
+                label = f"✅ {zona}\n{ZONAS_BALIZA[zona]}"
+
             with c:
                 if st.button(label, key=f"zona_{zona}", use_container_width=True):
                     st.session_state.zona_baliza_atual = zona
@@ -719,7 +725,11 @@ with tab1:
     if selecionado:
         tipo_txt = st.session_state.tipo_remate_atual or "—"
         resultado_txt = st.session_state.resultado_remate_atual or "—"
-        zona_txt = st.session_state.zona_baliza_atual or "—"
+        zona_txt = (
+            f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
+            if st.session_state.zona_baliza_atual is not None
+            else "—"
+        )
         st.markdown(
             f"""
             <div class='selected-athlete-fixed'>
@@ -756,12 +766,16 @@ with tab1:
 
     with subtab4:
         st.markdown("**Zona da baliza**")
-        st.caption("Seleciona a zona onde entrou, foi defendido, falhou ou bateu no poste.")
-        st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
+        st.caption("Seleciona a zona correspondente.")
+        st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
         render_grelha_zonas()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        zona_label = ZONAS_BALIZA.get(st.session_state.zona_baliza_atual, "—")
+        zona_label = (
+            f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
+            if st.session_state.zona_baliza_atual is not None
+            else "—"
+        )
         st.markdown(f"Zona selecionada: **{zona_label}**")
 
     pode_confirmar = all([
