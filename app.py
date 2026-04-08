@@ -251,6 +251,7 @@ TIPOS_REMATE = [
     "Pivô",
     "Contra-ataque",
     "7 metros",
+    "GR",
 ]
 
 RESULTADOS_REMATE = [
@@ -334,6 +335,11 @@ def get_player_by_num(numero):
     return None
 
 
+def atleta_selecionado_e_gr():
+    jogador = get_player_by_num(st.session_state.selecionado_id)
+    return jogador["gr"] if jogador else False
+
+
 def nome_compacto(nome, limite=14):
     partes = nome.split()
     if len(partes) == 1:
@@ -377,6 +383,7 @@ def mapear_tipo_remate(tipo):
         "Pivô": "remates_pivo",
         "Contra-ataque": "remates_contra_ataque",
         "7 metros": "remates_7m",
+        "GR": None,
     }
     return mapa.get(tipo)
 
@@ -387,11 +394,17 @@ def confirmar_registo_remate():
     resultado = st.session_state.resultado_remate_atual
     zona = st.session_state.zona_baliza_atual
 
-    if not numero or not tipo or not resultado or not zona:
+    if not numero or not resultado or not zona:
         return
 
     jogador = get_player_by_num(numero)
     if not jogador:
+        return
+
+    if jogador["gr"] and not tipo:
+        tipo = "GR"
+
+    if not jogador["gr"] and not tipo:
         return
 
     ensure_player_stats(jogador)
@@ -723,7 +736,7 @@ with tab1:
     st.markdown("### Registo rápido")
 
     if selecionado:
-        tipo_txt = st.session_state.tipo_remate_atual or "—"
+        tipo_txt = st.session_state.tipo_remate_atual or ("GR" if selecionado["gr"] else "—")
         resultado_txt = st.session_state.resultado_remate_atual or "—"
         zona_txt = (
             f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
@@ -755,9 +768,20 @@ with tab1:
         st.markdown("</div>", unsafe_allow_html=True)
 
     with subtab2:
-        st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-        render_grelha_lista_botoes(TIPOS_REMATE, "tipo_remate_atual", "tipo", n_cols=2)
-        st.markdown("</div>", unsafe_allow_html=True)
+        if atleta_selecionado_e_gr():
+            st.info("Para guarda-redes, o tipo não é obrigatório. A app assume GR automaticamente.")
+            if st.button("Assumir tipo GR", key="tipo_gr", use_container_width=True):
+                st.session_state.tipo_remate_atual = "GR"
+                st.rerun()
+        else:
+            st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
+            render_grelha_lista_botoes(
+                [t for t in TIPOS_REMATE if t != "GR"],
+                "tipo_remate_atual",
+                "tipo",
+                n_cols=2,
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
 
     with subtab3:
         st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
@@ -778,9 +802,12 @@ with tab1:
         )
         st.markdown(f"Zona selecionada: **{zona_label}**")
 
+    jogador_atual = get_player_by_num(st.session_state.selecionado_id) if st.session_state.selecionado_id else None
+    tipo_obrigatorio = False if (jogador_atual and jogador_atual["gr"]) else True
+
     pode_confirmar = all([
         st.session_state.selecionado_id is not None,
-        st.session_state.tipo_remate_atual is not None,
+        (st.session_state.tipo_remate_atual is not None if tipo_obrigatorio else True),
         st.session_state.resultado_remate_atual is not None,
         st.session_state.zona_baliza_atual is not None,
     ])
