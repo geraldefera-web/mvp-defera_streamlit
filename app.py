@@ -6,14 +6,14 @@ import streamlit as st
 
 st.set_page_config(page_title="DEFERA Stats Live", layout="wide")
 
-# =========================
+# =========================================================
 # ESTILO
-# =========================
+# =========================================================
 DEFERA_RED = "#D40000"
 DEFERA_BLACK = "#000000"
 DEFERA_DARK = "#111111"
 DEFERA_GREY = "#2A2A2A"
-DEFERA_LIGHT = "#F5F5F5"
+DEFERA_PANEL = "#151515"
 
 st.markdown(
     f"""
@@ -27,70 +27,25 @@ st.markdown(
             color: white;
         }}
 
-        h1, h2, h3, h4, h5, h6, p, div, span, label {{
-            color: white !important;
-        }}
-
         .block-container {{
+            max-width: 1200px;
             padding-top: 0.8rem;
             padding-bottom: 1rem;
-            max-width: 1450px;
         }}
 
-        div[data-testid="stMetric"] {{
-            background-color: {DEFERA_DARK};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 12px;
-            padding: 8px 12px;
-        }}
-
-        div[data-testid="stDataFrame"] {{
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }}
-
-        .section-box {{
-            background: {DEFERA_DARK};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 14px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }}
-
-        .defera-note {{
-            background: rgba(212,0,0,0.12);
-            border-left: 4px solid {DEFERA_RED};
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }}
-
-        .danger-box {{
-            background: rgba(255,0,0,0.14);
-            border: 1px solid rgba(255,0,0,0.35);
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-top: 4px;
-            margin-bottom: 10px;
-        }}
-
-        /* Inputs base */
-        input, textarea {{
+        h1, h2, h3, h4, h5, h6, p, span, label, div {{
             color: white !important;
-            -webkit-text-fill-color: white !important;
         }}
 
-        /* Text input / select / multiselect */
-        div[data-baseweb="input"] input {{
-            color: white !important;
-            -webkit-text-fill-color: white !important;
-        }}
-
-        div[data-baseweb="select"] > div {{
-            background-color: #101010 !important;
+        /* Inputs */
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="select"] > div,
+        textarea,
+        input {{
+            background: #111111 !important;
             color: white !important;
             border: 1px solid #444 !important;
+            -webkit-text-fill-color: white !important;
         }}
 
         div[data-baseweb="select"] span {{
@@ -102,116 +57,112 @@ st.markdown(
             color: white !important;
         }}
 
-        div[data-baseweb="popover"] * {{
+        /* dropdown aberto */
+        div[role="listbox"],
+        ul[role="listbox"] {{
+            background: #f2f2f2 !important;
+        }}
+
+        li[role="option"], li[role="option"] * {{
             color: black !important;
         }}
 
-        ul[role="listbox"] * {{
-            color: black !important;
-        }}
-
-        li[role="option"] * {{
-            color: black !important;
-        }}
-
-        /* Botões gerais */
+        /* Botões */
         .stButton > button {{
             width: 100%;
             border-radius: 10px;
             border: 1px solid {DEFERA_RED};
             background-color: {DEFERA_RED};
-            color: white;
+            color: white !important;
             font-weight: 700;
-            min-height: 2.8rem;
-            font-size: 1rem;
+            min-height: 2.7rem;
         }}
 
         .stButton > button:hover {{
-            background-color: #A90000;
-            border-color: #A90000;
-            color: white;
+            background-color: #a90000;
+            border-color: #a90000;
+            color: white !important;
         }}
 
-        /* Download button */
         .stDownloadButton > button {{
             width: 100%;
             border-radius: 10px;
             border: 1px solid {DEFERA_RED};
             background-color: {DEFERA_RED};
-            color: white;
+            color: white !important;
             font-weight: 700;
-            min-height: 2.8rem;
-            font-size: 0.95rem;
+            min-height: 2.7rem;
         }}
 
-        /* Botões dos atletas compactos */
-        .player-btn .stButton > button {{
-            min-height: 2.1rem !important;
-            padding: 0.25rem 0.45rem !important;
-            font-size: 0.82rem !important;
-            border-radius: 8px !important;
+        /* Métricas */
+        div[data-testid="stMetric"] {{
+            background: {DEFERA_PANEL};
+            border: 1px solid {DEFERA_GREY};
+            border-radius: 12px;
+            padding: 10px 12px;
         }}
 
-        /* Botões das ações um pouco mais compactos */
-        .action-btn .stButton > button {{
-            min-height: 2.4rem !important;
-            padding: 0.3rem 0.5rem !important;
-            font-size: 0.90rem !important;
-            border-radius: 8px !important;
+        /* Caixas utilitárias */
+        .note-box {{
+            background: rgba(212,0,0,0.12);
+            border-left: 4px solid {DEFERA_RED};
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 8px 0 14px 0;
         }}
 
-        /* Forçar colunas lado a lado também em mobile */
-        div[data-testid="stHorizontalBlock"] {{
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            gap: 0.6rem !important;
-            align-items: flex-start !important;
+        .danger-box {{
+            background: rgba(255,0,0,0.14);
+            border: 1px solid rgba(255,0,0,0.35);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 8px 0 14px 0;
         }}
 
-        div[data-testid="column"] {{
-            min-width: 0 !important;
+        /* Painel manual */
+        .manual-panel {{
+            display: grid;
+            grid-template-columns: 42% 58%;
+            gap: 10px;
+            align-items: start;
         }}
 
-        /* Para a zona principal atletas + ações */
-        .mobile-dual-col {{
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
+        .manual-col {{
+            background: {DEFERA_PANEL};
+            border: 1px solid {DEFERA_GREY};
+            border-radius: 14px;
+            padding: 10px;
         }}
 
-        .mobile-panel {{
-            background: transparent;
+        .manual-col-title {{
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }}
 
+        .selected-athlete {{
+            background: rgba(212,0,0,0.16);
+            border: 1px solid rgba(212,0,0,0.35);
+            border-radius: 10px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }}
+
+        /* Mobile */
         @media (max-width: 768px) {{
             .block-container {{
-                padding-left: 0.6rem;
-                padding-right: 0.6rem;
+                padding-left: 0.55rem;
+                padding-right: 0.55rem;
             }}
 
             h1 {{
-                font-size: 2.2rem !important;
+                font-size: 2.1rem !important;
             }}
 
-            h2 {{
-                font-size: 1.9rem !important;
-            }}
-
-            h3 {{
-                font-size: 1.35rem !important;
-            }}
-
-            /* Mantém colunas lado a lado em mobile */
-            div[data-testid="stHorizontalBlock"] {{
-                flex-wrap: nowrap !important;
-            }}
-
-            div[data-testid="column"]:first-child {{
-                flex: 0.95 1 0% !important;
-            }}
-
-            div[data-testid="column"]:last-child {{
-                flex: 1.05 1 0% !important;
+            .manual-panel {{
+                grid-template-columns: 40% 60%;
+                gap: 8px;
             }}
         }}
     </style>
@@ -219,9 +170,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# =========================
+# =========================================================
 # DADOS
-# =========================
+# =========================================================
 EQUIPAS = {
     "Sénior": [
         {"numero": 1, "nome": "Nuno Pinheiro", "gr": False},
@@ -300,9 +251,9 @@ EVENTOS_JOGADOR = [
 EVENTOS_GR = EVENTOS_JOGADOR + ["Defesa GR"]
 
 
-# =========================
-# FUNÇÕES DE ESTADO
-# =========================
+# =========================================================
+# ESTADO
+# =========================================================
 def init_state():
     defaults = {
         "jogo_iniciado": False,
@@ -311,7 +262,7 @@ def init_state():
         "adversario": "",
         "competicao": "",
         "local_jogo": "",
-        "data_jogo": date.today().strftime("%Y-%m-%d"),
+        "data_jogo": date.today().strftime("%d/%m/%Y"),
         "convocados_ids": [],
         "selecionado_id": None,
         "eventos_log": [],
@@ -436,9 +387,9 @@ def anular_ultima_acao():
     st.session_state.ultima_acao_registada = ""
 
 
-# =========================
-# DATAFRAMES / EXPORTAÇÃO
-# =========================
+# =========================================================
+# DATAFRAMES
+# =========================================================
 def dataframe_resumo():
     rows = []
     for jogador in get_convocados():
@@ -493,37 +444,29 @@ def ficha_jogo_df(momento_exportacao="Final"):
 def exportar_excel_bytes(momento_exportacao="Final"):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        ficha_jogo_df(momento_exportacao=momento_exportacao).to_excel(
-            writer, sheet_name="Ficha do Jogo", index=False
-        )
+        ficha_jogo_df(momento_exportacao=momento_exportacao).to_excel(writer, sheet_name="Ficha do Jogo", index=False)
         dataframe_resumo().to_excel(writer, sheet_name="Resumo por Atleta", index=False)
         dataframe_eventos().to_excel(writer, sheet_name="Log de Eventos", index=False)
     output.seek(0)
     return output.getvalue()
 
 
-# =========================
-# INÍCIO
-# =========================
+# =========================================================
+# RENDER PRINCIPAL
+# =========================================================
 init_state()
 
 st.title("DEFERA Stats Live")
 st.caption("Seleciona o atleta à esquerda e regista a ação à direita.")
 
-# =========================
-# CONFIGURAÇÃO DO JOGO
-# =========================
 if not st.session_state.jogo_iniciado:
     st.subheader("Configuração do jogo")
 
-    c1, c2 = st.columns(2)
-    with c1:
-        equipa = st.selectbox("Equipa", list(EQUIPAS.keys()))
-        adversario = st.text_input("Adversário")
-        competicao = st.text_input("Competição")
-    with c2:
-        local_jogo = st.text_input("Local")
-        data_jogo = st.text_input("Data do jogo", value=st.session_state.data_jogo)
+    equipa = st.selectbox("Equipa", list(EQUIPAS.keys()))
+    adversario = st.text_input("Adversário")
+    competicao = st.text_input("Competição")
+    local_jogo = st.text_input("Local")
+    data_jogo = st.text_input("Data do jogo", value=st.session_state.data_jogo)
 
     plantel = get_plantel(equipa)
     st.markdown("#### Convocados")
@@ -552,9 +495,7 @@ if not st.session_state.jogo_iniciado:
             st.rerun()
     st.stop()
 
-# =========================
-# TOPO
-# =========================
+# topo
 m1, m2, m3, m4 = st.columns(4)
 with m1:
     st.metric("Parte", st.session_state.parte)
@@ -566,181 +507,138 @@ with m4:
     st.metric("Selecionado", st.session_state.selecionado_id if st.session_state.selecionado_id else "-")
 
 if st.session_state.ultima_acao_anulada:
-    st.markdown(
-        f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>", unsafe_allow_html=True)
 elif st.session_state.ultima_acao_registada:
-    st.markdown(
-        f"<div class='defera-note'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<div class='note-box'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>", unsafe_allow_html=True)
 
-# =========================
-# CONTROLOS
-# =========================
-c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
-with c1:
-    if st.button(
-        "Passar para 2.ª Parte",
-        use_container_width=True,
-        disabled=st.session_state.parte == "2.ª Parte"
-    ):
-        st.session_state.parte = "2.ª Parte"
-        st.rerun()
+tab1, tab2, tab3 = st.tabs(["Registo rápido", "Fecho do jogo", "Resumo"])
 
-with c2:
-    if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
-        anular_ultima_acao()
-        st.rerun()
-
-with c3:
-    st.download_button(
-        "Exportar Excel ao intervalo",
-        data=exportar_excel_bytes("Intervalo"),
-        file_name=f"defera_stats_intervalo_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )
-
-with c4:
-    if st.button("Novo jogo", use_container_width=True):
-        reset_jogo()
-        st.rerun()
-
-# =========================
-# LADO A LADO: ATLETAS / AÇÕES
-# =========================
-left, right = st.columns([1, 1], gap="small")
-
-convocados = get_convocados()
-campo = [j for j in convocados if not j["gr"]]
-grs = [j for j in convocados if j["gr"]]
-
-
-def render_grid(jogadores, prefix):
-    for jogador in jogadores:
-        selecionado = st.session_state.selecionado_id == jogador["numero"]
-        label = f"{jogador['numero']} · {short_name(jogador['nome'])}"
-        if jogador["gr"]:
-            label += " 🧤"
-        if selecionado:
-            label = f"✅ {label}"
-
-        st.markdown("<div class='player-btn'>", unsafe_allow_html=True)
-        if st.button(
-            label,
-            key=f"{prefix}_{jogador['numero']}",
-            use_container_width=True,
-            type="secondary"
-        ):
-            st.session_state.selecionado_id = jogador["numero"]
+with tab1:
+    c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
+    with c1:
+        if st.button("Passar para 2.ª Parte", use_container_width=True, disabled=st.session_state.parte == "2.ª Parte"):
+            st.session_state.parte = "2.ª Parte"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+    with c2:
+        if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
+            anular_ultima_acao()
+            st.rerun()
+    with c3:
+        st.download_button(
+            "Exportar Excel ao intervalo",
+            data=exportar_excel_bytes("Intervalo"),
+            file_name=f"defera_stats_intervalo_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+    with c4:
+        if st.button("Novo jogo", use_container_width=True):
+            reset_jogo()
+            st.rerun()
 
-
-with left:
-    st.markdown("### Atletas")
-    if campo:
-        st.markdown("#### Campo")
-        render_grid(campo, "campo")
-    if grs:
-        st.markdown("#### GR")
-        render_grid(grs, "gr")
-
-with right:
-    st.markdown("### Ações")
+    convocados = get_convocados()
+    campo = [j for j in convocados if not j["gr"]]
+    grs = [j for j in convocados if j["gr"]]
     selecionado = get_player_by_num(st.session_state.selecionado_id)
+
+    st.markdown("<div class='manual-panel'>", unsafe_allow_html=True)
+
+    # coluna atletas
+    st.markdown("<div class='manual-col'>", unsafe_allow_html=True)
+    st.markdown("<div class='manual-col-title'>Atletas</div>", unsafe_allow_html=True)
+
+    if campo:
+        st.markdown("**Campo**")
+        for j in campo:
+            label = f"{j['numero']} · {short_name(j['nome'])}"
+            if st.session_state.selecionado_id == j["numero"]:
+                label = f"✅ {label}"
+            if st.button(label, key=f"campo_{j['numero']}", use_container_width=True):
+                st.session_state.selecionado_id = j["numero"]
+                st.rerun()
+
+    if grs:
+        st.markdown("**GR**")
+        for j in grs:
+            label = f"{j['numero']} · {short_name(j['nome'])} 🧤"
+            if st.session_state.selecionado_id == j["numero"]:
+                label = f"✅ {label}"
+            if st.button(label, key=f"gr_{j['numero']}", use_container_width=True):
+                st.session_state.selecionado_id = j["numero"]
+                st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # coluna ações
+    st.markdown("<div class='manual-col'>", unsafe_allow_html=True)
+    st.markdown("<div class='manual-col-title'>Ações</div>", unsafe_allow_html=True)
 
     if selecionado:
         st.markdown(
-            f"""
-            <div class="section-box">
-                <h3 style="margin:0;">
-                    Camisola {selecionado['numero']} · {selecionado['nome']}
-                    {" · GR" if selecionado['gr'] else ""}
-                </h3>
-            </div>
-            """,
+            f"<div class='selected-athlete'>Camisola {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}</div>",
             unsafe_allow_html=True,
         )
 
         eventos = EVENTOS_GR if selecionado["gr"] else EVENTOS_JOGADOR
         for evento in eventos:
-            st.markdown("<div class='action-btn'>", unsafe_allow_html=True)
-            if st.button(
-                evento,
-                key=f"evento_{selecionado['numero']}_{evento}",
-                use_container_width=True
-            ):
+            if st.button(evento, key=f"evento_{selecionado['numero']}_{evento}", use_container_width=True):
                 registar_evento(selecionado["numero"], evento)
                 st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.info("Seleciona um atleta.")
 
-# =========================
-# FECHO
-# =========================
-st.divider()
-st.markdown("### Fecho do jogo")
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-r1, r2 = st.columns(2)
-with r1:
-    st.session_state.resultado_cd_xico = st.number_input(
-        "Resultado final CD Xico",
-        min_value=0,
-        step=1,
-        value=int(st.session_state.resultado_cd_xico),
-    )
-with r2:
-    st.session_state.resultado_adversario = st.number_input(
-        "Resultado final adversário",
-        min_value=0,
-        step=1,
-        value=int(st.session_state.resultado_adversario),
-    )
+with tab2:
+    st.markdown("### Fecho do jogo")
 
-r3, r4 = st.columns(2)
-with r3:
-    st.session_state.resultado_intervalo_cd_xico = st.number_input(
-        "Resultado ao intervalo CD Xico",
-        min_value=0,
-        step=1,
-        value=int(st.session_state.resultado_intervalo_cd_xico),
-    )
-with r4:
-    st.session_state.resultado_intervalo_adversario = st.number_input(
-        "Resultado ao intervalo adversário",
-        min_value=0,
-        step=1,
-        value=int(st.session_state.resultado_intervalo_adversario),
-    )
-
-st.session_state.observacoes = st.text_area(
-    "Observações finais",
-    value=st.session_state.observacoes
-)
-
-# =========================
-# RESUMO
-# =========================
-st.divider()
-st.markdown("### Resumo estatístico")
-st.dataframe(dataframe_resumo(), use_container_width=True, hide_index=True)
-
-if not dataframe_eventos().empty:
-    with st.expander("Ver últimas ações"):
-        st.dataframe(
-            dataframe_eventos().tail(20).iloc[::-1],
-            use_container_width=True,
-            hide_index=True,
+    r1, r2 = st.columns(2)
+    with r1:
+        st.session_state.resultado_cd_xico = st.number_input(
+            "Resultado final CD Xico",
+            min_value=0,
+            step=1,
+            value=int(st.session_state.resultado_cd_xico),
+        )
+    with r2:
+        st.session_state.resultado_adversario = st.number_input(
+            "Resultado final adversário",
+            min_value=0,
+            step=1,
+            value=int(st.session_state.resultado_adversario),
         )
 
-st.download_button(
-    "Exportar Excel do jogo",
-    data=exportar_excel_bytes("Final"),
-    file_name=f"defera_stats_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    use_container_width=True,
-)
+    r3, r4 = st.columns(2)
+    with r3:
+        st.session_state.resultado_intervalo_cd_xico = st.number_input(
+            "Resultado ao intervalo CD Xico",
+            min_value=0,
+            step=1,
+            value=int(st.session_state.resultado_intervalo_cd_xico),
+        )
+    with r4:
+        st.session_state.resultado_intervalo_adversario = st.number_input(
+            "Resultado ao intervalo adversário",
+            min_value=0,
+            step=1,
+            value=int(st.session_state.resultado_intervalo_adversario),
+        )
+
+    st.session_state.observacoes = st.text_area("Observações finais", value=st.session_state.observacoes)
+
+    st.download_button(
+        "Exportar Excel do jogo",
+        data=exportar_excel_bytes("Final"),
+        file_name=f"defera_stats_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+    )
+
+with tab3:
+    st.markdown("### Resumo estatístico")
+    st.dataframe(dataframe_resumo(), use_container_width=True, hide_index=True)
+
+    if not dataframe_eventos().empty:
+        with st.expander("Ver últimas ações"):
+            st.dataframe(dataframe_eventos().tail(20).iloc[::-1], use_container_width=True, hide_index=True)
