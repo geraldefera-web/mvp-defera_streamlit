@@ -1,4 +1,6 @@
 import io
+import json
+import os
 from datetime import date
 
 import pandas as pd
@@ -291,6 +293,7 @@ ZONAS_BALIZA = {
 }
 
 MAX_CONVOCADOS = 16
+BACKUP_FILE = "/tmp/defera_stats_live_backup.json"
 
 # =========================================================
 # ESTADO
@@ -326,7 +329,70 @@ def init_state():
             st.session_state[key] = value
 
 
+def snapshot_state():
+    keys = [
+        "jogo_iniciado",
+        "parte",
+        "equipa",
+        "adversario",
+        "competicao",
+        "local_jogo",
+        "data_jogo",
+        "convocados_ids",
+        "selecionado_id",
+        "eventos_log",
+        "stats",
+        "resultado_cd_xico",
+        "resultado_adversario",
+        "resultado_intervalo_cd_xico",
+        "resultado_intervalo_adversario",
+        "observacoes",
+        "ultima_acao_anulada",
+        "ultima_acao_registada",
+        "acao_atual",
+        "resultado_defesa_gr_atual",
+        "tipo_remate_atual",
+        "resultado_remate_atual",
+        "zona_baliza_atual",
+    ]
+    return {k: st.session_state.get(k) for k in keys}
+
+
+def save_backup():
+    try:
+        with open(BACKUP_FILE, "w", encoding="utf-8") as f:
+            json.dump(snapshot_state(), f, ensure_ascii=False)
+    except Exception:
+        pass
+
+
+def load_backup():
+    try:
+        if os.path.exists(BACKUP_FILE):
+            with open(BACKUP_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        return None
+    return None
+
+
+def restore_backup(data):
+    if not data:
+        return
+    for k, v in data.items():
+        st.session_state[k] = v
+
+
+def clear_backup():
+    try:
+        if os.path.exists(BACKUP_FILE):
+            os.remove(BACKUP_FILE)
+    except Exception:
+        pass
+
+
 def reset_jogo():
+    clear_backup()
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     init_state()
@@ -338,6 +404,7 @@ def limpar_fluxo_acao():
     st.session_state.tipo_remate_atual = None
     st.session_state.resultado_remate_atual = None
     st.session_state.zona_baliza_atual = None
+    save_backup()
 
 
 def get_plantel(equipa_nome):
@@ -445,6 +512,7 @@ def registar_acao_simples(acao):
 
     st.session_state.ultima_acao_registada = f"{jogador['numero']} · {jogador['nome']} → {acao}"
     st.session_state.ultima_acao_anulada = ""
+    save_backup()
     limpar_fluxo_acao()
 
 
@@ -457,14 +525,8 @@ def confirmar_defesa_gr():
     resultado = st.session_state.resultado_defesa_gr_atual
     zona = st.session_state.zona_baliza_atual
 
-    if resultado is None:
+    if resultado is None or zona is None:
         return
-
-    if resultado == "Defendeu" and not zona:
-        return
-
-    if resultado != "Defendeu":
-        zona = None
 
     ensure_player_stats(jogador)
     s = st.session_state.stats[numero]
@@ -483,16 +545,17 @@ def confirmar_defesa_gr():
             "resultado_defesa_gr": resultado,
             "tipo_remate": "",
             "resultado_remate": "",
-            "zona_baliza": zona if zona is not None else "",
-            "zona_baliza_label": ZONAS_BALIZA.get(zona, "") if zona is not None else "",
+            "zona_baliza": zona,
+            "zona_baliza_label": ZONAS_BALIZA.get(zona, ""),
         }
     )
 
-    extra = f" / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}" if resultado == "Defendeu" else ""
+    extra = f" / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}"
     st.session_state.ultima_acao_registada = (
         f"{jogador['numero']} · {jogador['nome']} → Defesa do Guarda redes / {resultado}{extra}"
     )
     st.session_state.ultima_acao_anulada = ""
+    save_backup()
     limpar_fluxo_acao()
 
 
@@ -521,7 +584,7 @@ def confirmar_remate():
     if not tipo or not resultado:
         return
 
-    if resultado == "Defesa GR" and not zona:
+    if resultado == "Defesa GR" and zona is None:
         return
 
     if resultado != "Defesa GR":
@@ -564,6 +627,7 @@ def confirmar_remate():
         f"{jogador['numero']} · {jogador['nome']} → Remate / {tipo} / {resultado}{extra}"
     )
     st.session_state.ultima_acao_anulada = ""
+    save_backup()
     limpar_fluxo_acao()
 
 
@@ -609,16 +673,13 @@ def anular_ultima_acao():
             if s["golos_sofridos"] > 0:
                 s["golos_sofridos"] -= 1
 
-        extra = (
-            f" / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
-            if ultimo["zona_baliza"] != ""
-            else ""
-        )
+        extra = f" / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
         st.session_state.ultima_acao_anulada = (
             f"Ação anulada: {numero} · {ultimo['atleta']} → Defesa do Guarda redes / "
             f"{ultimo['resultado_defesa_gr']}{extra}"
         )
         st.session_state.ultima_acao_registada = ""
+        save_backup()
         limpar_fluxo_acao()
         return
 
@@ -652,6 +713,7 @@ def anular_ultima_acao():
             f"{ultimo['tipo_remate']} / {ultimo['resultado_remate']}{extra}"
         )
         st.session_state.ultima_acao_registada = ""
+        save_backup()
         limpar_fluxo_acao()
         return
 
@@ -661,6 +723,7 @@ def anular_ultima_acao():
 
     st.session_state.ultima_acao_anulada = f"Ação anulada: {numero} · {ultimo['atleta']} → {acao}"
     st.session_state.ultima_acao_registada = ""
+    save_backup()
     limpar_fluxo_acao()
 
 
@@ -677,6 +740,7 @@ def render_grelha_atletas_numeros(jogadores, n_cols=4):
             with cols[idx]:
                 if st.button(label, key=f"atleta_{j['numero']}", use_container_width=True):
                     st.session_state.selecionado_id = j["numero"]
+                    save_backup()
                     limpar_fluxo_acao()
                     st.rerun()
 
@@ -695,6 +759,7 @@ def render_grelha_acoes_rapidas(itens, n_cols=2):
                     st.session_state.tipo_remate_atual = None
                     st.session_state.resultado_remate_atual = None
                     st.session_state.zona_baliza_atual = None
+                    save_backup()
 
                     if item in ["Defesa do Guarda redes", "Remate"]:
                         st.rerun()
@@ -713,6 +778,7 @@ def render_grelha_lista_botoes(itens, chave_estado, prefixo, n_cols=2):
             with cols[idx]:
                 if st.button(label, key=f"{prefixo}_{item}", use_container_width=True):
                     st.session_state[chave_estado] = item
+                    save_backup()
                     st.rerun()
 
 
@@ -728,6 +794,7 @@ def render_grelha_zonas():
             with c:
                 if st.button(label, key=f"zona_{zona}", use_container_width=True):
                     st.session_state.zona_baliza_atual = zona
+                    save_backup()
                     st.rerun()
             idx += 1
 
@@ -825,6 +892,20 @@ def exportar_excel_bytes(momento_exportacao="Final"):
 # =========================================================
 init_state()
 
+if not st.session_state.jogo_iniciado:
+    backup = load_backup()
+    if backup and backup.get("jogo_iniciado"):
+        st.warning("Foi encontrado um jogo em curso guardado automaticamente.")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Recuperar último jogo", use_container_width=True):
+                restore_backup(backup)
+                st.rerun()
+        with c2:
+            if st.button("Ignorar recuperação", use_container_width=True):
+                clear_backup()
+                st.rerun()
+
 st.title("DEFERA Stats Live")
 st.caption("Modo operacional — números à esquerda e ações à direita.")
 
@@ -861,6 +942,7 @@ if not st.session_state.jogo_iniciado:
             st.session_state.data_jogo = data_jogo.strip()
             st.session_state.convocados_ids = convocados_ids
             st.session_state.selecionado_id = sorted(convocados_ids)[0]
+            save_backup()
             limpar_fluxo_acao()
             st.rerun()
     st.stop()
@@ -884,6 +966,7 @@ c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
 with c1:
     if st.button("Passar para 2.ª Parte", use_container_width=True, disabled=st.session_state.parte == "2.ª Parte"):
         st.session_state.parte = "2.ª Parte"
+        save_backup()
         st.rerun()
 with c2:
     if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
@@ -963,7 +1046,7 @@ with right:
             st.markdown("</div>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
-            if st.session_state.resultado_defesa_gr_atual == "Defendeu":
+            if st.session_state.resultado_defesa_gr_atual is not None:
                 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
                 st.markdown("**Baliza**")
                 st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
@@ -974,7 +1057,7 @@ with right:
             pode_confirmar_defesa = all([
                 st.session_state.selecionado_id is not None,
                 st.session_state.resultado_defesa_gr_atual is not None,
-                (st.session_state.zona_baliza_atual is not None if st.session_state.resultado_defesa_gr_atual == "Defendeu" else True),
+                st.session_state.zona_baliza_atual is not None,
             ])
 
             b1, b2 = st.columns(2)
@@ -1061,6 +1144,7 @@ with st.expander("Fecho do jogo"):
         )
 
     st.session_state.observacoes = st.text_area("Observações finais", value=st.session_state.observacoes)
+    save_backup()
 
     st.download_button(
         "Exportar Excel do jogo",
