@@ -119,37 +119,38 @@ st.markdown(
             margin: 8px 0 14px 0;
         }}
 
-        /* Painel manual */
-        .manual-panel {{
-            display: grid;
-            grid-template-columns: 42% 58%;
-            gap: 10px;
-            align-items: start;
+        /* Grelhas compactas */
+        .compact-grid .stButton > button {{
+            min-height: 2.15rem !important;
+            padding: 0.20rem 0.35rem !important;
+            font-size: 0.82rem !important;
+            line-height: 1.05 !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
         }}
 
-        .manual-col {{
-            background: {DEFERA_PANEL};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 14px;
-            padding: 10px;
+        .action-grid .stButton > button {{
+            min-height: 2.2rem !important;
+            padding: 0.25rem 0.35rem !important;
+            font-size: 0.84rem !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
         }}
 
-        .manual-col-title {{
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }}
-
-        .selected-athlete {{
+        .selected-athlete-fixed {{
             background: rgba(212,0,0,0.16);
             border: 1px solid rgba(212,0,0,0.35);
             border-radius: 10px;
             padding: 8px 10px;
             margin-bottom: 10px;
             font-weight: 700;
+            position: sticky;
+            top: 0.25rem;
+            z-index: 10;
         }}
 
-        /* Mobile */
         @media (max-width: 768px) {{
             .block-container {{
                 padding-left: 0.55rem;
@@ -160,9 +161,16 @@ st.markdown(
                 font-size: 2.1rem !important;
             }}
 
-            .manual-panel {{
-                grid-template-columns: 40% 60%;
-                gap: 8px;
+            .compact-grid .stButton > button {{
+                min-height: 2.05rem !important;
+                font-size: 0.78rem !important;
+                padding: 0.18rem 0.28rem !important;
+            }}
+
+            .action-grid .stButton > button {{
+                min-height: 2.1rem !important;
+                font-size: 0.80rem !important;
+                padding: 0.20rem 0.28rem !important;
             }}
         }}
     </style>
@@ -311,6 +319,17 @@ def short_name(nome):
     return f"{partes[0]} {partes[-1]}"
 
 
+def nome_compacto(nome, limite=14):
+    partes = nome.split()
+    if len(partes) == 1:
+        base = nome
+    elif len(partes) == 2:
+        base = nome
+    else:
+        base = f"{partes[0]} {partes[-1]}"
+    return base if len(base) <= limite else base[:limite - 1] + "…"
+
+
 def ensure_player_stats(jogador):
     pid = jogador["numero"]
     if pid not in st.session_state.stats:
@@ -388,6 +407,40 @@ def anular_ultima_acao():
 
 
 # =========================================================
+# GRELHAS MOBILE
+# =========================================================
+def render_grelha_atletas(jogadores, prefix, n_cols=2):
+    for i in range(0, len(jogadores), n_cols):
+        cols = st.columns(n_cols)
+        bloco = jogadores[i:i + n_cols]
+
+        for idx, j in enumerate(bloco):
+            selecionado = st.session_state.selecionado_id == j["numero"]
+            label = f"{j['numero']} · {nome_compacto(j['nome'])}"
+            if j["gr"]:
+                label += " 🧤"
+            if selecionado:
+                label = f"✅ {label}"
+
+            with cols[idx]:
+                if st.button(label, key=f"{prefix}_{j['numero']}", use_container_width=True):
+                    st.session_state.selecionado_id = j["numero"]
+                    st.rerun()
+
+
+def render_grelha_acoes(eventos, jogador_numero, n_cols=2):
+    for i in range(0, len(eventos), n_cols):
+        cols = st.columns(n_cols)
+        bloco = eventos[i:i + n_cols]
+
+        for idx, evento in enumerate(bloco):
+            with cols[idx]:
+                if st.button(evento, key=f"evento_{jogador_numero}_{evento}", use_container_width=True):
+                    registar_evento(jogador_numero, evento)
+                    st.rerun()
+
+
+# =========================================================
 # DATAFRAMES
 # =========================================================
 def dataframe_resumo():
@@ -457,7 +510,7 @@ def exportar_excel_bytes(momento_exportacao="Final"):
 init_state()
 
 st.title("DEFERA Stats Live")
-st.caption("Seleciona o atleta à esquerda e regista a ação à direita.")
+st.caption("Seleciona o atleta e regista a ação.")
 
 if not st.session_state.jogo_iniciado:
     st.subheader("Configuração do jogo")
@@ -507,9 +560,15 @@ with m4:
     st.metric("Selecionado", st.session_state.selecionado_id if st.session_state.selecionado_id else "-")
 
 if st.session_state.ultima_acao_anulada:
-    st.markdown(f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>",
+        unsafe_allow_html=True,
+    )
 elif st.session_state.ultima_acao_registada:
-    st.markdown(f"<div class='note-box'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='note-box'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>",
+        unsafe_allow_html=True,
+    )
 
 tab1, tab2, tab3 = st.tabs(["Registo rápido", "Fecho do jogo", "Resumo"])
 
@@ -541,54 +600,43 @@ with tab1:
     grs = [j for j in convocados if j["gr"]]
     selecionado = get_player_by_num(st.session_state.selecionado_id)
 
-    st.markdown("<div class='manual-panel'>", unsafe_allow_html=True)
-
-    # coluna atletas
-    st.markdown("<div class='manual-col'>", unsafe_allow_html=True)
-    st.markdown("<div class='manual-col-title'>Atletas</div>", unsafe_allow_html=True)
-
-    if campo:
-        st.markdown("**Campo**")
-        for j in campo:
-            label = f"{j['numero']} · {short_name(j['nome'])}"
-            if st.session_state.selecionado_id == j["numero"]:
-                label = f"✅ {label}"
-            if st.button(label, key=f"campo_{j['numero']}", use_container_width=True):
-                st.session_state.selecionado_id = j["numero"]
-                st.rerun()
-
-    if grs:
-        st.markdown("**GR**")
-        for j in grs:
-            label = f"{j['numero']} · {short_name(j['nome'])} 🧤"
-            if st.session_state.selecionado_id == j["numero"]:
-                label = f"✅ {label}"
-            if st.button(label, key=f"gr_{j['numero']}", use_container_width=True):
-                st.session_state.selecionado_id = j["numero"]
-                st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # coluna ações
-    st.markdown("<div class='manual-col'>", unsafe_allow_html=True)
-    st.markdown("<div class='manual-col-title'>Ações</div>", unsafe_allow_html=True)
+    st.markdown("### Registo rápido")
 
     if selecionado:
         st.markdown(
-            f"<div class='selected-athlete'>Camisola {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}</div>",
+            f"""
+            <div class='selected-athlete-fixed'>
+                Atleta selecionado — Camisola {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-
-        eventos = EVENTOS_GR if selecionado["gr"] else EVENTOS_JOGADOR
-        for evento in eventos:
-            if st.button(evento, key=f"evento_{selecionado['numero']}_{evento}", use_container_width=True):
-                registar_evento(selecionado["numero"], evento)
-                st.rerun()
     else:
         st.info("Seleciona um atleta.")
 
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    subtab1, subtab2 = st.tabs(["Atletas", "Ações"])
+
+    with subtab1:
+        st.markdown("<div class='compact-grid'>", unsafe_allow_html=True)
+
+        if campo:
+            st.markdown("**Jogadores de campo**")
+            render_grelha_atletas(campo, "campo", n_cols=2)
+
+        if grs:
+            st.markdown("**Guarda-redes**")
+            render_grelha_atletas(grs, "gr", n_cols=2)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with subtab2:
+        if selecionado:
+            eventos = EVENTOS_GR if selecionado["gr"] else EVENTOS_JOGADOR
+            st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
+            render_grelha_acoes(eventos, selecionado["numero"], n_cols=2)
+            st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("Seleciona primeiro um atleta na tab Atletas.")
 
 with tab2:
     st.markdown("### Fecho do jogo")
@@ -641,4 +689,8 @@ with tab3:
 
     if not dataframe_eventos().empty:
         with st.expander("Ver últimas ações"):
-            st.dataframe(dataframe_eventos().tail(20).iloc[::-1], use_container_width=True, hide_index=True)
+            st.dataframe(
+                dataframe_eventos().tail(20).iloc[::-1],
+                use_container_width=True,
+                hide_index=True,
+            )
