@@ -28,7 +28,7 @@ st.markdown(
         }}
 
         .block-container {{
-            max-width: 1200px;
+            max-width: 1300px;
             padding-top: 0.8rem;
             padding-bottom: 1rem;
         }}
@@ -72,7 +72,7 @@ st.markdown(
             background-color: {DEFERA_RED};
             color: white !important;
             font-weight: 700;
-            min-height: 2.55rem;
+            min-height: 2.4rem;
         }}
 
         .stButton > button:hover {{
@@ -88,7 +88,7 @@ st.markdown(
             background-color: {DEFERA_RED};
             color: white !important;
             font-weight: 700;
-            min-height: 2.55rem;
+            min-height: 2.4rem;
         }}
 
         div[data-testid="stMetric"] {{
@@ -114,74 +114,73 @@ st.markdown(
             margin: 8px 0 14px 0;
         }}
 
-        .compact-grid .stButton > button {{
-            min-height: 2.1rem !important;
-            padding: 0.20rem 0.35rem !important;
-            font-size: 0.82rem !important;
-            line-height: 1.05 !important;
-            border-radius: 8px !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }}
-
-        .action-grid .stButton > button {{
-            min-height: 2.45rem !important;
-            padding: 0.25rem 0.30rem !important;
-            font-size: 0.76rem !important;
-            border-radius: 8px !important;
-            line-height: 1.05 !important;
-            white-space: pre-line !important;
-        }}
-
-        .zone-grid .stButton > button {{
-            min-height: 4.35rem !important;
-            padding: 0.28rem 0.22rem !important;
-            font-size: 0.66rem !important;
-            border-radius: 8px !important;
-            line-height: 1.05 !important;
-            white-space: pre-line !important;
-        }}
-
-        .selected-athlete-fixed {{
+        .selected-box {{
             background: rgba(212,0,0,0.16);
             border: 1px solid rgba(212,0,0,0.35);
             border-radius: 10px;
-            padding: 8px 10px;
+            padding: 10px 12px;
             margin-bottom: 10px;
             font-weight: 700;
-            position: sticky;
-            top: 0.25rem;
-            z-index: 10;
+        }}
+
+        .section-card {{
+            background: {DEFERA_PANEL};
+            border: 1px solid {DEFERA_GREY};
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+        }}
+
+        .athlete-grid .stButton > button {{
+            min-height: 2.2rem !important;
+            padding: 0.20rem !important;
+            font-size: 0.88rem !important;
+            border-radius: 8px !important;
+        }}
+
+        .action-grid .stButton > button {{
+            min-height: 2.25rem !important;
+            padding: 0.20rem 0.28rem !important;
+            font-size: 0.78rem !important;
+            border-radius: 8px !important;
+            line-height: 1.05 !important;
+            white-space: normal !important;
+        }}
+
+        .zone-grid .stButton > button {{
+            min-height: 4.0rem !important;
+            padding: 0.20rem 0.12rem !important;
+            font-size: 0.60rem !important;
+            border-radius: 8px !important;
+            line-height: 1.0 !important;
+            white-space: pre-line !important;
         }}
 
         @media (max-width: 768px) {{
             .block-container {{
-                padding-left: 0.55rem;
-                padding-right: 0.55rem;
+                padding-left: 0.45rem;
+                padding-right: 0.45rem;
             }}
 
             h1 {{
-                font-size: 2.0rem !important;
+                font-size: 1.9rem !important;
             }}
 
-            .compact-grid .stButton > button {{
+            .athlete-grid .stButton > button {{
                 min-height: 2.0rem !important;
-                font-size: 0.78rem !important;
-                padding: 0.18rem 0.28rem !important;
+                font-size: 0.82rem !important;
             }}
 
             .action-grid .stButton > button {{
-                min-height: 2.15rem !important;
-                font-size: 0.73rem !important;
-                padding: 0.18rem 0.24rem !important;
+                min-height: 2.05rem !important;
+                font-size: 0.72rem !important;
+                padding: 0.16rem 0.20rem !important;
             }}
 
             .zone-grid .stButton > button {{
-                min-height: 4.55rem !important;
-                font-size: 0.60rem !important;
-                padding: 0.22rem 0.12rem !important;
-                line-height: 1.0 !important;
+                min-height: 4.15rem !important;
+                font-size: 0.55rem !important;
+                padding: 0.18rem 0.08rem !important;
             }}
         }}
     </style>
@@ -251,7 +250,6 @@ TIPOS_REMATE = [
     "Pivô",
     "Contra-ataque",
     "7 metros",
-    "GR",
 ]
 
 RESULTADOS_REMATE = [
@@ -272,6 +270,8 @@ ZONAS_BALIZA = {
     8: "Centro Inferior",
     9: "Canto Inferior Direito",
 }
+
+MAX_CONVOCADOS = 16
 
 # =========================================================
 # ESTADO
@@ -324,7 +324,7 @@ def get_plantel(equipa_nome):
 def get_convocados():
     return sorted(
         [j for j in get_plantel(st.session_state.equipa) if j["numero"] in st.session_state.convocados_ids],
-        key=lambda x: (x["gr"], x["numero"], x["nome"]),
+        key=lambda x: x["numero"],
     )
 
 
@@ -338,17 +338,6 @@ def get_player_by_num(numero):
 def atleta_selecionado_e_gr():
     jogador = get_player_by_num(st.session_state.selecionado_id)
     return jogador["gr"] if jogador else False
-
-
-def nome_compacto(nome, limite=14):
-    partes = nome.split()
-    if len(partes) == 1:
-        base = nome
-    elif len(partes) == 2:
-        base = nome
-    else:
-        base = f"{partes[0]} {partes[-1]}"
-    return base if len(base) <= limite else base[:limite - 1] + "…"
 
 
 def ensure_player_stats(jogador):
@@ -502,25 +491,19 @@ def anular_ultima_acao():
     st.session_state.ultima_acao_registada = ""
     limpar_selecao_remate()
 
-
 # =========================================================
-# GRELHAS MOBILE
+# RENDER GRELHAS
 # =========================================================
-def render_grelha_atletas(jogadores, prefix, n_cols=2):
+def render_grelha_atletas_numeros(jogadores, n_cols=4):
     for i in range(0, len(jogadores), n_cols):
         cols = st.columns(n_cols)
         bloco = jogadores[i:i + n_cols]
 
         for idx, j in enumerate(bloco):
             selecionado = st.session_state.selecionado_id == j["numero"]
-            label = f"{j['numero']} · {nome_compacto(j['nome'])}"
-            if j["gr"]:
-                label += " 🧤"
-            if selecionado:
-                label = f"✅ {label}"
-
+            label = f"✅ {j['numero']}" if selecionado else str(j["numero"])
             with cols[idx]:
-                if st.button(label, key=f"{prefix}_{j['numero']}", use_container_width=True):
+                if st.button(label, key=f"atleta_{j['numero']}", use_container_width=True):
                     st.session_state.selecionado_id = j["numero"]
                     limpar_selecao_remate()
                     st.rerun()
@@ -548,17 +531,12 @@ def render_grelha_zonas():
         for c in cols:
             zona = zonas[idx]
             selecionado = st.session_state.zona_baliza_atual == zona
-
-            label = f"{zona}\n{ZONAS_BALIZA[zona]}"
-            if selecionado:
-                label = f"✅ {zona}\n{ZONAS_BALIZA[zona]}"
-
+            label = f"✅ {zona}\n{ZONAS_BALIZA[zona]}" if selecionado else f"{zona}\n{ZONAS_BALIZA[zona]}"
             with c:
                 if st.button(label, key=f"zona_{zona}", use_container_width=True):
                     st.session_state.zona_baliza_atual = zona
                     st.rerun()
             idx += 1
-
 
 # =========================================================
 # DATAFRAMES
@@ -636,14 +614,13 @@ def exportar_excel_bytes(momento_exportacao="Final"):
     output.seek(0)
     return output.getvalue()
 
-
 # =========================================================
 # RENDER PRINCIPAL
 # =========================================================
 init_state()
 
 st.title("DEFERA Stats Live")
-st.caption("Seleciona o atleta e regista o remate.")
+st.caption("Modo operacional — números à esquerda e ações à direita.")
 
 if not st.session_state.jogo_iniciado:
     st.subheader("Configuração do jogo")
@@ -655,20 +632,21 @@ if not st.session_state.jogo_iniciado:
     data_jogo = st.text_input("Data do jogo", value=st.session_state.data_jogo)
 
     plantel = get_plantel(equipa)
-    st.markdown("#### Convocados")
+    opcoes = {f"{j['numero']} · {j['nome']}{' 🧤' if j['gr'] else ''}": j["numero"] for j in plantel}
 
-    opcoes = {
-        f"Camisola {j['numero']} · {j['nome']}{' 🧤' if j['gr'] else ''}": j["numero"]
-        for j in plantel
-    }
+    st.markdown(f"#### Convocados (máximo {MAX_CONVOCADOS})")
     labels = st.multiselect("Selecionar atletas", list(opcoes.keys()))
     convocados_ids = [opcoes[label] for label in labels]
+
+    st.caption(f"Selecionados: {len(convocados_ids)}/{MAX_CONVOCADOS}")
 
     if st.button("Iniciar jogo", use_container_width=True):
         if not adversario.strip():
             st.warning("Preenche o adversário.")
         elif not convocados_ids:
             st.warning("Seleciona os convocados.")
+        elif len(convocados_ids) > MAX_CONVOCADOS:
+            st.warning(f"No andebol, a convocatória está limitada a {MAX_CONVOCADOS} atletas.")
         else:
             st.session_state.jogo_iniciado = True
             st.session_state.equipa = equipa
@@ -690,141 +668,123 @@ with m2:
 with m3:
     st.metric("Adversário", st.session_state.resultado_adversario)
 with m4:
-    st.metric("Selecionado", st.session_state.selecionado_id if st.session_state.selecionado_id else "-")
+    st.metric("Convocados", len(st.session_state.convocados_ids))
 
 if st.session_state.ultima_acao_anulada:
-    st.markdown(
-        f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>",
-        unsafe_allow_html=True,
-    )
+    st.markdown(f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>", unsafe_allow_html=True)
 elif st.session_state.ultima_acao_registada:
-    st.markdown(
-        f"<div class='note-box'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>",
-        unsafe_allow_html=True,
+    st.markdown(f"<div class='note-box'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>", unsafe_allow_html=True)
+
+c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
+with c1:
+    if st.button("Passar para 2.ª Parte", use_container_width=True, disabled=st.session_state.parte == "2.ª Parte"):
+        st.session_state.parte = "2.ª Parte"
+        st.rerun()
+with c2:
+    if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
+        anular_ultima_acao()
+        st.rerun()
+with c3:
+    st.download_button(
+        "Exportar Excel ao intervalo",
+        data=exportar_excel_bytes("Intervalo"),
+        file_name=f"defera_stats_intervalo_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
     )
+with c4:
+    if st.button("Novo jogo", use_container_width=True):
+        reset_jogo()
+        st.rerun()
 
-tab1, tab2, tab3 = st.tabs(["Registo rápido", "Fecho do jogo", "Resumo"])
+convocados = get_convocados()
+selecionado = get_player_by_num(st.session_state.selecionado_id)
 
-with tab1:
-    c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
-    with c1:
-        if st.button("Passar para 2.ª Parte", use_container_width=True, disabled=st.session_state.parte == "2.ª Parte"):
-            st.session_state.parte = "2.ª Parte"
-            st.rerun()
-    with c2:
-        if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
-            anular_ultima_acao()
-            st.rerun()
-    with c3:
-        st.download_button(
-            "Exportar Excel ao intervalo",
-            data=exportar_excel_bytes("Intervalo"),
-            file_name=f"defera_stats_intervalo_{st.session_state.equipa}_{st.session_state.adversario}.xlsx".replace(" ", "_"),
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
+left, right = st.columns([0.85, 1.35], gap="medium")
+
+with left:
+    st.markdown("### Números")
+    st.markdown("<div class='athlete-grid'>", unsafe_allow_html=True)
+    render_grelha_atletas_numeros(convocados, n_cols=4)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if selecionado:
+        gr_txt = " · GR" if selecionado["gr"] else ""
+        st.markdown(
+            f"<div class='selected-box'>Selecionado — {selecionado['numero']} · {selecionado['nome']}{gr_txt}</div>",
+            unsafe_allow_html=True,
         )
-    with c4:
-        if st.button("Novo jogo", use_container_width=True):
-            reset_jogo()
-            st.rerun()
 
-    convocados = get_convocados()
-    campo = [j for j in convocados if not j["gr"]]
-    grs = [j for j in convocados if j["gr"]]
-    selecionado = get_player_by_num(st.session_state.selecionado_id)
-
-    st.markdown("### Registo rápido")
+with right:
+    st.markdown("### Ações")
 
     if selecionado:
         tipo_txt = st.session_state.tipo_remate_atual or ("GR" if selecionado["gr"] else "—")
         resultado_txt = st.session_state.resultado_remate_atual or "—"
         zona_txt = (
             f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
-            if st.session_state.zona_baliza_atual is not None
-            else "—"
+            if st.session_state.zona_baliza_atual is not None else "—"
         )
+
         st.markdown(
             f"""
-            <div class='selected-athlete-fixed'>
-                Atleta — Camisola {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}<br>
+            <div class='selected-box'>
+                Atleta — {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}<br>
                 Tipo — {tipo_txt} &nbsp;&nbsp;|&nbsp;&nbsp; Resultado — {resultado_txt} &nbsp;&nbsp;|&nbsp;&nbsp; Zona — {zona_txt}
             </div>
             """,
             unsafe_allow_html=True,
         )
-    else:
-        st.info("Seleciona um atleta.")
 
-    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Atletas", "Tipo", "Resultado", "Baliza"])
-
-    with subtab1:
-        st.markdown("<div class='compact-grid'>", unsafe_allow_html=True)
-        if campo:
-            st.markdown("**Jogadores de campo**")
-            render_grelha_atletas(campo, "campo", n_cols=2)
-        if grs:
-            st.markdown("**Guarda-redes**")
-            render_grelha_atletas(grs, "gr", n_cols=2)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with subtab2:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.markdown("**Tipo**")
         if atleta_selecionado_e_gr():
-            st.info("Para guarda-redes, o tipo não é obrigatório. A app assume GR automaticamente.")
-            if st.button("Assumir tipo GR", key="tipo_gr", use_container_width=True):
-                st.session_state.tipo_remate_atual = "GR"
-                st.rerun()
+            st.info("Para guarda-redes, o tipo não é obrigatório.")
         else:
             st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-            render_grelha_lista_botoes(
-                [t for t in TIPOS_REMATE if t != "GR"],
-                "tipo_remate_atual",
-                "tipo",
-                n_cols=2,
-            )
+            render_grelha_lista_botoes(TIPOS_REMATE, "tipo_remate_atual", "tipo", n_cols=2)
             st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    with subtab3:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.markdown("**Resultado**")
         st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
         render_grelha_lista_botoes(RESULTADOS_REMATE, "resultado_remate_atual", "resultado", n_cols=2)
         st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    with subtab4:
-        st.markdown("**Zona da baliza**")
-        st.caption("Seleciona a zona correspondente.")
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.markdown("**Baliza**")
         st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
         render_grelha_zonas()
         st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        zona_label = (
-            f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
-            if st.session_state.zona_baliza_atual is not None
-            else "—"
-        )
-        st.markdown(f"Zona selecionada: **{zona_label}**")
+        jogador_atual = get_player_by_num(st.session_state.selecionado_id) if st.session_state.selecionado_id else None
+        tipo_obrigatorio = False if (jogador_atual and jogador_atual["gr"]) else True
 
-    jogador_atual = get_player_by_num(st.session_state.selecionado_id) if st.session_state.selecionado_id else None
-    tipo_obrigatorio = False if (jogador_atual and jogador_atual["gr"]) else True
+        pode_confirmar = all([
+            st.session_state.selecionado_id is not None,
+            (st.session_state.tipo_remate_atual is not None if tipo_obrigatorio else True),
+            st.session_state.resultado_remate_atual is not None,
+            st.session_state.zona_baliza_atual is not None,
+        ])
 
-    pode_confirmar = all([
-        st.session_state.selecionado_id is not None,
-        (st.session_state.tipo_remate_atual is not None if tipo_obrigatorio else True),
-        st.session_state.resultado_remate_atual is not None,
-        st.session_state.zona_baliza_atual is not None,
-    ])
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("CONFIRMAR REMATE", use_container_width=True, disabled=not pode_confirmar):
+                confirmar_registo_remate()
+                st.rerun()
+        with b2:
+            if st.button("LIMPAR SELEÇÃO", use_container_width=True):
+                limpar_selecao_remate()
+                st.rerun()
+    else:
+        st.info("Seleciona um atleta.")
 
-    b1, b2 = st.columns(2)
-    with b1:
-        if st.button("CONFIRMAR REMATE", use_container_width=True, disabled=not pode_confirmar):
-            confirmar_registo_remate()
-            st.rerun()
-    with b2:
-        if st.button("LIMPAR SELEÇÃO", use_container_width=True):
-            limpar_selecao_remate()
-            st.rerun()
+st.divider()
 
-with tab2:
-    st.markdown("### Fecho do jogo")
-
+with st.expander("Fecho do jogo"):
     r1, r2 = st.columns(2)
     with r1:
         st.session_state.resultado_cd_xico = st.number_input(
@@ -867,8 +827,7 @@ with tab2:
         use_container_width=True,
     )
 
-with tab3:
-    st.markdown("### Resumo estatístico")
+with st.expander("Resumo estatístico"):
     st.dataframe(dataframe_resumo(), use_container_width=True, hide_index=True)
 
     if not dataframe_eventos().empty:
