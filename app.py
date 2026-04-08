@@ -10,9 +10,9 @@ st.set_page_config(page_title="DEFERA Stats Live", layout="wide")
 # ESTILO
 # =========================
 DEFERA_RED = "#D40000"
-DEFERA_BLACK = "#0A0A0A"
-DEFERA_DARK = "#151515"
-DEFERA_GREY = "#222222"
+DEFERA_BLACK = "#000000"
+DEFERA_DARK = "#111111"
+DEFERA_GREY = "#2A2A2A"
 DEFERA_LIGHT = "#F5F5F5"
 
 st.markdown(
@@ -23,13 +23,17 @@ st.markdown(
             color: white;
         }}
 
+        html, body, [class*="css"] {{
+            color: white;
+        }}
+
         h1, h2, h3, h4, h5, h6, p, div, span, label {{
             color: white !important;
         }}
 
         .block-container {{
-            padding-top: 1rem;
-            padding-bottom: 1.5rem;
+            padding-top: 0.8rem;
+            padding-bottom: 1rem;
             max-width: 1450px;
         }}
 
@@ -37,7 +41,7 @@ st.markdown(
             background-color: {DEFERA_DARK};
             border: 1px solid {DEFERA_GREY};
             border-radius: 12px;
-            padding: 10px 14px;
+            padding: 8px 12px;
         }}
 
         div[data-testid="stDataFrame"] {{
@@ -46,24 +50,12 @@ st.markdown(
             overflow: hidden;
         }}
 
-        textarea, input {{
-            color: white !important;
-        }}
-
-        div[data-baseweb="select"] > div,
-        div[data-baseweb="input"] > div,
-        textarea {{
-            background-color: #111111 !important;
-            color: white !important;
-            border: 1px solid #333333 !important;
-        }}
-
         .section-box {{
             background: {DEFERA_DARK};
             border: 1px solid {DEFERA_GREY};
             border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
         }}
 
         .defera-note {{
@@ -74,9 +66,52 @@ st.markdown(
             margin-bottom: 10px;
         }}
 
-        .small-label {{
-            font-size: 0.86rem;
-            opacity: 0.9;
+        .danger-box {{
+            background: rgba(255,0,0,0.14);
+            border: 1px solid rgba(255,0,0,0.35);
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }}
+
+        /* Inputs base */
+        input, textarea {{
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+        }}
+
+        /* Text input / select / multiselect */
+        div[data-baseweb="input"] input {{
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+        }}
+
+        div[data-baseweb="select"] > div {{
+            background-color: #101010 !important;
+            color: white !important;
+            border: 1px solid #444 !important;
+        }}
+
+        div[data-baseweb="select"] span {{
+            color: white !important;
+        }}
+
+        div[data-baseweb="tag"] {{
+            background-color: {DEFERA_RED} !important;
+            color: white !important;
+        }}
+
+        div[data-baseweb="popover"] * {{
+            color: black !important;
+        }}
+
+        ul[role="listbox"] * {{
+            color: black !important;
+        }}
+
+        li[role="option"] * {{
+            color: black !important;
         }}
 
         /* Botões gerais */
@@ -87,29 +122,97 @@ st.markdown(
             background-color: {DEFERA_RED};
             color: white;
             font-weight: 700;
+            min-height: 2.8rem;
+            font-size: 1rem;
         }}
 
         .stButton > button:hover {{
-            background-color: #aa0000;
-            border-color: #aa0000;
+            background-color: #A90000;
+            border-color: #A90000;
             color: white;
         }}
 
-        /* Botões mais compactos para atletas */
-        div[data-testid="stVerticalBlock"] div[data-testid="stButton"] button[kind="secondary"] {{
-            min-height: 2.2rem;
-            padding-top: 0.25rem;
-            padding-bottom: 0.25rem;
-            font-size: 0.85rem;
+        /* Download button */
+        .stDownloadButton > button {{
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid {DEFERA_RED};
+            background-color: {DEFERA_RED};
+            color: white;
+            font-weight: 700;
+            min-height: 2.8rem;
+            font-size: 0.95rem;
         }}
 
-        .danger-box {{
-            background: rgba(255,0,0,0.14);
-            border: 1px solid rgba(255,0,0,0.35);
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-top: 4px;
-            margin-bottom: 10px;
+        /* Botões dos atletas compactos */
+        .player-btn .stButton > button {{
+            min-height: 2.1rem !important;
+            padding: 0.25rem 0.45rem !important;
+            font-size: 0.82rem !important;
+            border-radius: 8px !important;
+        }}
+
+        /* Botões das ações um pouco mais compactos */
+        .action-btn .stButton > button {{
+            min-height: 2.4rem !important;
+            padding: 0.3rem 0.5rem !important;
+            font-size: 0.90rem !important;
+            border-radius: 8px !important;
+        }}
+
+        /* Forçar colunas lado a lado também em mobile */
+        div[data-testid="stHorizontalBlock"] {{
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            gap: 0.6rem !important;
+            align-items: flex-start !important;
+        }}
+
+        div[data-testid="column"] {{
+            min-width: 0 !important;
+        }}
+
+        /* Para a zona principal atletas + ações */
+        .mobile-dual-col {{
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }}
+
+        .mobile-panel {{
+            background: transparent;
+        }}
+
+        @media (max-width: 768px) {{
+            .block-container {{
+                padding-left: 0.6rem;
+                padding-right: 0.6rem;
+            }}
+
+            h1 {{
+                font-size: 2.2rem !important;
+            }}
+
+            h2 {{
+                font-size: 1.9rem !important;
+            }}
+
+            h3 {{
+                font-size: 1.35rem !important;
+            }}
+
+            /* Mantém colunas lado a lado em mobile */
+            div[data-testid="stHorizontalBlock"] {{
+                flex-wrap: nowrap !important;
+            }}
+
+            div[data-testid="column"]:first-child {{
+                flex: 0.95 1 0% !important;
+            }}
+
+            div[data-testid="column"]:last-child {{
+                flex: 1.05 1 0% !important;
+            }}
         }}
     </style>
     """,
@@ -208,7 +311,7 @@ def init_state():
         "adversario": "",
         "competicao": "",
         "local_jogo": "",
-        "data_jogo": date.today(),
+        "data_jogo": date.today().strftime("%Y-%m-%d"),
         "convocados_ids": [],
         "selecionado_id": None,
         "eventos_log": [],
@@ -345,7 +448,7 @@ def dataframe_resumo():
     if not rows:
         return pd.DataFrame()
 
-    df = pd.DataFrame(rows)[[
+    return pd.DataFrame(rows)[[
         "numero_camisola",
         "atleta",
         "golos",
@@ -362,8 +465,6 @@ def dataframe_resumo():
         "golos_1p",
         "golos_2p",
     ]].sort_values(["numero_camisola", "atleta"])
-
-    return df
 
 
 def dataframe_eventos():
@@ -422,7 +523,7 @@ if not st.session_state.jogo_iniciado:
         competicao = st.text_input("Competição")
     with c2:
         local_jogo = st.text_input("Local")
-        data_jogo = st.date_input("Data do jogo", value=date.today())
+        data_jogo = st.text_input("Data do jogo", value=st.session_state.data_jogo)
 
     plantel = get_plantel(equipa)
     st.markdown("#### Convocados")
@@ -445,7 +546,7 @@ if not st.session_state.jogo_iniciado:
             st.session_state.adversario = adversario.strip()
             st.session_state.competicao = competicao.strip()
             st.session_state.local_jogo = local_jogo.strip()
-            st.session_state.data_jogo = data_jogo
+            st.session_state.data_jogo = data_jogo.strip()
             st.session_state.convocados_ids = convocados_ids
             st.session_state.selecionado_id = sorted(convocados_ids)[0]
             st.rerun()
@@ -462,10 +563,13 @@ with m2:
 with m3:
     st.metric("Adversário", st.session_state.resultado_adversario)
 with m4:
-    st.metric("Atleta selecionado", st.session_state.selecionado_id if st.session_state.selecionado_id else "-")
+    st.metric("Selecionado", st.session_state.selecionado_id if st.session_state.selecionado_id else "-")
 
 if st.session_state.ultima_acao_anulada:
-    st.markdown(f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='danger-box'><strong>{st.session_state.ultima_acao_anulada}</strong></div>",
+        unsafe_allow_html=True
+    )
 elif st.session_state.ultima_acao_registada:
     st.markdown(
         f"<div class='defera-note'><strong>Última ação registada:</strong> {st.session_state.ultima_acao_registada}</div>",
@@ -473,9 +577,9 @@ elif st.session_state.ultima_acao_registada:
     )
 
 # =========================
-# CONTROLOS PRINCIPAIS
+# CONTROLOS
 # =========================
-c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1])
+c1, c2, c3, c4 = st.columns([1, 1.2, 1.25, 1])
 with c1:
     if st.button(
         "Passar para 2.ª Parte",
@@ -505,62 +609,56 @@ with c4:
         st.rerun()
 
 # =========================
-# ZONA PRINCIPAL: ATLETAS + AÇÕES
+# LADO A LADO: ATLETAS / AÇÕES
 # =========================
-left, right = st.columns([1.05, 1.25], gap="large")
+left, right = st.columns([1, 1], gap="small")
 
 convocados = get_convocados()
 campo = [j for j in convocados if not j["gr"]]
 grs = [j for j in convocados if j["gr"]]
 
 
-def render_grid(jogadores, prefix, n_cols=2):
-    for i in range(0, len(jogadores), n_cols):
-        cols = st.columns(n_cols)
-        bloco = jogadores[i:i + n_cols]
-        for idx, jogador in enumerate(bloco):
-            selecionado = st.session_state.selecionado_id == jogador["numero"]
-            label = f"{jogador['numero']} · {short_name(jogador['nome'])}"
-            if jogador["gr"]:
-                label += " 🧤"
-            if selecionado:
-                label = f"✅ {label}"
+def render_grid(jogadores, prefix):
+    for jogador in jogadores:
+        selecionado = st.session_state.selecionado_id == jogador["numero"]
+        label = f"{jogador['numero']} · {short_name(jogador['nome'])}"
+        if jogador["gr"]:
+            label += " 🧤"
+        if selecionado:
+            label = f"✅ {label}"
 
-            with cols[idx]:
-                if st.button(
-                    label,
-                    key=f"{prefix}_{jogador['numero']}",
-                    use_container_width=True,
-                    type="secondary"
-                ):
-                    st.session_state.selecionado_id = jogador["numero"]
-                    st.rerun()
+        st.markdown("<div class='player-btn'>", unsafe_allow_html=True)
+        if st.button(
+            label,
+            key=f"{prefix}_{jogador['numero']}",
+            use_container_width=True,
+            type="secondary"
+        ):
+            st.session_state.selecionado_id = jogador["numero"]
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 with left:
-    st.markdown("### Atletas convocados")
-    st.caption("Botões compactos para manter o registo no mesmo ecrã.")
-
+    st.markdown("### Atletas")
     if campo:
-        st.markdown("#### Jogadores de campo")
-        render_grid(campo, "campo", n_cols=2)
-
+        st.markdown("#### Campo")
+        render_grid(campo, "campo")
     if grs:
-        st.markdown("#### Guarda-redes")
-        render_grid(grs, "gr", n_cols=2)
+        st.markdown("#### GR")
+        render_grid(grs, "gr")
 
 with right:
-    st.markdown("### Ações do atleta selecionado")
+    st.markdown("### Ações")
     selecionado = get_player_by_num(st.session_state.selecionado_id)
 
     if selecionado:
         st.markdown(
             f"""
             <div class="section-box">
-                <div class="small-label">Atleta ativo</div>
-                <h3 style="margin-top:6px;">
+                <h3 style="margin:0;">
                     Camisola {selecionado['numero']} · {selecionado['nome']}
-                    {" · Guarda-redes" if selecionado['gr'] else ""}
+                    {" · GR" if selecionado['gr'] else ""}
                 </h3>
             </div>
             """,
@@ -568,23 +666,21 @@ with right:
         )
 
         eventos = EVENTOS_GR if selecionado["gr"] else EVENTOS_JOGADOR
-
-        for i in range(0, len(eventos), 2):
-            cols = st.columns(2)
-            for idx, evento in enumerate(eventos[i:i + 2]):
-                with cols[idx]:
-                    if st.button(
-                        evento,
-                        key=f"evento_{selecionado['numero']}_{evento}",
-                        use_container_width=True
-                    ):
-                        registar_evento(selecionado["numero"], evento)
-                        st.rerun()
+        for evento in eventos:
+            st.markdown("<div class='action-btn'>", unsafe_allow_html=True)
+            if st.button(
+                evento,
+                key=f"evento_{selecionado['numero']}_{evento}",
+                use_container_width=True
+            ):
+                registar_evento(selecionado["numero"], evento)
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.info("Seleciona um atleta para abrir o quadro de ações.")
+        st.info("Seleciona um atleta.")
 
 # =========================
-# FECHO DO JOGO
+# FECHO
 # =========================
 st.divider()
 st.markdown("### Fecho do jogo")
