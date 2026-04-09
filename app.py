@@ -12,16 +12,18 @@ st.set_page_config(page_title="DEFERA Stats Live", layout="wide")
 # ESTILO
 # =========================================================
 DEFERA_RED = "#D40000"
-DEFERA_BLACK = "#000000"
+DEFERA_BLACK = "#070707"
 DEFERA_DARK = "#111111"
 DEFERA_GREY = "#2A2A2A"
 DEFERA_PANEL = "#151515"
+DEFERA_PANEL_2 = "#1D1D1D"
+DEFERA_BORDER = "#303030"
 
 st.markdown(
     f"""
     <style>
         .stApp {{
-            background-color: {DEFERA_BLACK};
+            background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
             color: white;
         }}
 
@@ -30,8 +32,8 @@ st.markdown(
         }}
 
         .block-container {{
-            max-width: 1300px;
-            padding-top: 0.8rem;
+            max-width: 1320px;
+            padding-top: 0.55rem;
             padding-bottom: 1rem;
         }}
 
@@ -39,14 +41,21 @@ st.markdown(
             color: white !important;
         }}
 
+        h1 {{
+            font-size: 2rem !important;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.1rem !important;
+        }}
+
         div[data-baseweb="input"] > div,
         div[data-baseweb="select"] > div,
         textarea,
         input {{
-            background: #111111 !important;
+            background: #101010 !important;
             color: white !important;
-            border: 1px solid #444 !important;
+            border: 1px solid #404040 !important;
             -webkit-text-fill-color: white !important;
+            border-radius: 10px !important;
         }}
 
         div[data-baseweb="select"] span {{
@@ -69,41 +78,42 @@ st.markdown(
 
         .stButton > button {{
             width: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid {DEFERA_RED};
-            background-color: {DEFERA_RED};
+            background: linear-gradient(180deg, {DEFERA_RED} 0%, #b30000 100%);
             color: white !important;
             font-weight: 700;
             min-height: 2.3rem;
+            box-shadow: none !important;
         }}
 
         .stButton > button:hover {{
-            background-color: #a90000;
-            border-color: #a90000;
+            background: linear-gradient(180deg, #b30000 0%, #980000 100%);
+            border-color: #b30000;
             color: white !important;
         }}
 
         .stDownloadButton > button {{
             width: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid {DEFERA_RED};
-            background-color: {DEFERA_RED};
+            background: linear-gradient(180deg, {DEFERA_RED} 0%, #b30000 100%);
             color: white !important;
             font-weight: 700;
             min-height: 2.3rem;
         }}
 
         div[data-testid="stMetric"] {{
-            background: {DEFERA_PANEL};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 12px;
+            background: linear-gradient(180deg, {DEFERA_PANEL} 0%, {DEFERA_PANEL_2} 100%);
+            border: 1px solid {DEFERA_BORDER};
+            border-radius: 16px;
             padding: 10px 12px;
         }}
 
         .note-box {{
             background: rgba(212,0,0,0.12);
             border-left: 4px solid {DEFERA_RED};
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px 12px;
             margin: 8px 0 14px 0;
         }}
@@ -111,78 +121,99 @@ st.markdown(
         .danger-box {{
             background: rgba(255,0,0,0.14);
             border: 1px solid rgba(255,0,0,0.35);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px 12px;
             margin: 8px 0 14px 0;
         }}
 
         .selected-box {{
-            background: rgba(212,0,0,0.16);
+            background: linear-gradient(180deg, rgba(212,0,0,0.18) 0%, rgba(212,0,0,0.08) 100%);
             border: 1px solid rgba(212,0,0,0.35);
-            border-radius: 10px;
+            border-radius: 14px;
             padding: 10px 12px;
             margin-bottom: 10px;
             font-weight: 700;
         }}
 
         .section-card {{
-            background: {DEFERA_PANEL};
-            border: 1px solid {DEFERA_GREY};
-            border-radius: 12px;
+            background: linear-gradient(180deg, {DEFERA_PANEL} 0%, {DEFERA_PANEL_2} 100%);
+            border: 1px solid {DEFERA_BORDER};
+            border-radius: 16px;
             padding: 10px;
             margin-bottom: 12px;
         }}
 
+        .mini-caption {{
+            font-size: 0.74rem;
+            opacity: 0.78;
+            margin-bottom: 6px;
+        }}
+
         .athlete-grid .stButton > button {{
-            min-height: 2.15rem !important;
-            padding: 0.18rem !important;
-            font-size: 0.86rem !important;
-            border-radius: 8px !important;
+            min-height: 2.5rem !important;
+            padding: 0.20rem !important;
+            font-size: 0.95rem !important;
+            border-radius: 14px !important;
         }}
 
         .action-grid .stButton > button {{
-            min-height: 2.15rem !important;
-            padding: 0.16rem 0.20rem !important;
-            font-size: 0.70rem !important;
-            border-radius: 8px !important;
+            min-height: 2.35rem !important;
+            padding: 0.16rem 0.18rem !important;
+            font-size: 0.72rem !important;
+            border-radius: 12px !important;
             line-height: 1.05 !important;
             white-space: normal !important;
         }}
 
         .zone-grid .stButton > button {{
-            min-height: 3.9rem !important;
+            min-height: 4.2rem !important;
             padding: 0.18rem 0.10rem !important;
-            font-size: 0.52rem !important;
-            border-radius: 8px !important;
+            font-size: 0.53rem !important;
+            border-radius: 12px !important;
             line-height: 1.0 !important;
             white-space: pre-line !important;
         }}
 
+        .source-zone-grid .stButton > button {{
+            min-height: 2.5rem !important;
+            padding: 0.14rem 0.10rem !important;
+            font-size: 0.68rem !important;
+            border-radius: 12px !important;
+            line-height: 1.0 !important;
+            white-space: normal !important;
+        }}
+
         @media (max-width: 768px) {{
             .block-container {{
-                padding-left: 0.42rem;
-                padding-right: 0.42rem;
+                padding-left: 0.38rem;
+                padding-right: 0.38rem;
             }}
 
             h1 {{
-                font-size: 1.85rem !important;
+                font-size: 1.75rem !important;
             }}
 
             .athlete-grid .stButton > button {{
-                min-height: 2.0rem !important;
-                font-size: 0.80rem !important;
+                min-height: 2.2rem !important;
+                font-size: 0.86rem !important;
             }}
 
             .action-grid .stButton > button {{
-                min-height: 1.95rem !important;
-                font-size: 0.66rem !important;
-                padding: 0.12rem 0.14rem !important;
+                min-height: 2.05rem !important;
+                font-size: 0.64rem !important;
+                padding: 0.12rem 0.12rem !important;
             }}
 
             .zone-grid .stButton > button {{
-                min-height: 4.0rem !important;
-                font-size: 0.48rem !important;
-                padding: 0.14rem 0.06rem !important;
+                min-height: 4.05rem !important;
+                font-size: 0.47rem !important;
+                padding: 0.12rem 0.05rem !important;
+            }}
+
+            .source-zone-grid .stButton > button {{
+                min-height: 2.3rem !important;
+                font-size: 0.62rem !important;
+                padding: 0.12rem 0.08rem !important;
             }}
         }}
     </style>
@@ -280,6 +311,15 @@ RESULTADOS_REMATE = [
     "Poste",
 ]
 
+ZONAS_ORIGEM_REMATE = [
+    "6 metros",
+    "9 metros",
+    "7 metros",
+    "Ponta",
+    "Pivô",
+    "Contra-ataque",
+]
+
 ZONAS_BALIZA = {
     1: "Canto Superior Esquerdo",
     2: "Centro Superior",
@@ -322,6 +362,7 @@ def init_state():
         "resultado_defesa_gr_atual": None,
         "tipo_remate_atual": None,
         "resultado_remate_atual": None,
+        "zona_origem_gr_atual": None,
         "zona_baliza_atual": None,
     }
     for key, value in defaults.items():
@@ -353,6 +394,7 @@ def snapshot_state():
         "resultado_defesa_gr_atual",
         "tipo_remate_atual",
         "resultado_remate_atual",
+        "zona_origem_gr_atual",
         "zona_baliza_atual",
     ]
     return {k: st.session_state.get(k) for k in keys}
@@ -403,6 +445,7 @@ def limpar_fluxo_acao():
     st.session_state.resultado_defesa_gr_atual = None
     st.session_state.tipo_remate_atual = None
     st.session_state.resultado_remate_atual = None
+    st.session_state.zona_origem_gr_atual = None
     st.session_state.zona_baliza_atual = None
     save_backup()
 
@@ -505,6 +548,7 @@ def registar_acao_simples(acao):
             "resultado_defesa_gr": "",
             "tipo_remate": "",
             "resultado_remate": "",
+            "zona_origem_gr": "",
             "zona_baliza": "",
             "zona_baliza_label": "",
         }
@@ -523,9 +567,10 @@ def confirmar_defesa_gr():
         return
 
     resultado = st.session_state.resultado_defesa_gr_atual
+    origem = st.session_state.zona_origem_gr_atual
     zona = st.session_state.zona_baliza_atual
 
-    if resultado is None or zona is None:
+    if resultado is None or origem is None or zona is None:
         return
 
     ensure_player_stats(jogador)
@@ -545,12 +590,13 @@ def confirmar_defesa_gr():
             "resultado_defesa_gr": resultado,
             "tipo_remate": "",
             "resultado_remate": "",
+            "zona_origem_gr": origem,
             "zona_baliza": zona,
             "zona_baliza_label": ZONAS_BALIZA.get(zona, ""),
         }
     )
 
-    extra = f" / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}"
+    extra = f" / Origem {origem} / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}"
     st.session_state.ultima_acao_registada = (
         f"{jogador['numero']} · {jogador['nome']} → Defesa do Guarda redes / {resultado}{extra}"
     )
@@ -617,6 +663,7 @@ def confirmar_remate():
             "resultado_defesa_gr": "",
             "tipo_remate": tipo,
             "resultado_remate": resultado,
+            "zona_origem_gr": "",
             "zona_baliza": zona if zona is not None else "",
             "zona_baliza_label": ZONAS_BALIZA.get(zona, "") if zona is not None else "",
         }
@@ -673,7 +720,7 @@ def anular_ultima_acao():
             if s["golos_sofridos"] > 0:
                 s["golos_sofridos"] -= 1
 
-        extra = f" / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
+        extra = f" / Origem {ultimo['zona_origem_gr']} / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
         st.session_state.ultima_acao_anulada = (
             f"Ação anulada: {numero} · {ultimo['atleta']} → Defesa do Guarda redes / "
             f"{ultimo['resultado_defesa_gr']}{extra}"
@@ -758,6 +805,7 @@ def render_grelha_acoes_rapidas(itens, n_cols=2):
                     st.session_state.resultado_defesa_gr_atual = None
                     st.session_state.tipo_remate_atual = None
                     st.session_state.resultado_remate_atual = None
+                    st.session_state.zona_origem_gr_atual = None
                     st.session_state.zona_baliza_atual = None
                     save_backup()
 
@@ -854,6 +902,7 @@ def dataframe_eventos():
                 "resultado_defesa_gr",
                 "tipo_remate",
                 "resultado_remate",
+                "zona_origem_gr",
                 "zona_baliza",
                 "zona_baliza_label",
             ]
@@ -988,10 +1037,11 @@ with c4:
 convocados = get_convocados()
 selecionado = get_player_by_num(st.session_state.selecionado_id)
 
-left, right = st.columns([0.85, 1.35], gap="medium")
+left, right = st.columns([0.82, 1.38], gap="medium")
 
 with left:
-    st.markdown("### Números")
+    st.markdown("### Atletas")
+    st.markdown("<div class='mini-caption'>Seleciona apenas o número do atleta</div>", unsafe_allow_html=True)
     st.markdown("<div class='athlete-grid'>", unsafe_allow_html=True)
     render_grelha_atletas_numeros(convocados, n_cols=4)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1004,12 +1054,13 @@ with left:
         )
 
 with right:
-    st.markdown("### Ações")
+    st.markdown("### Registo")
 
     if selecionado:
         defesa_txt = st.session_state.resultado_defesa_gr_atual or "—"
         tipo_txt = st.session_state.tipo_remate_atual or "—"
         resultado_txt = st.session_state.resultado_remate_atual or "—"
+        origem_gr_txt = st.session_state.zona_origem_gr_atual or "—"
         zona_txt = (
             f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
             if st.session_state.zona_baliza_atual is not None else "—"
@@ -1023,7 +1074,8 @@ with right:
                 Defesa — {defesa_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
                 Tipo — {tipo_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
                 Resultado — {resultado_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Zona — {zona_txt}
+                Origem — {origem_gr_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
+                Baliza — {zona_txt}
             </div>
             """,
             unsafe_allow_html=True,
@@ -1048,7 +1100,14 @@ with right:
 
             if st.session_state.resultado_defesa_gr_atual is not None:
                 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-                st.markdown("**Baliza**")
+                st.markdown("**Origem do remate**")
+                st.markdown("<div class='source-zone-grid'>", unsafe_allow_html=True)
+                render_grelha_lista_botoes(ZONAS_ORIGEM_REMATE, "zona_origem_gr_atual", "origem_gr", n_cols=2)
+                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+                st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+                st.markdown("**Posição na baliza**")
                 st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
                 render_grelha_zonas()
                 st.markdown("</div>", unsafe_allow_html=True)
@@ -1057,6 +1116,7 @@ with right:
             pode_confirmar_defesa = all([
                 st.session_state.selecionado_id is not None,
                 st.session_state.resultado_defesa_gr_atual is not None,
+                st.session_state.zona_origem_gr_atual is not None,
                 st.session_state.zona_baliza_atual is not None,
             ])
 
@@ -1087,7 +1147,7 @@ with right:
 
             if st.session_state.resultado_remate_atual == "Defesa GR":
                 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-                st.markdown("**Baliza**")
+                st.markdown("**Posição na baliza**")
                 st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
                 render_grelha_zonas()
                 st.markdown("</div>", unsafe_allow_html=True)
