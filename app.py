@@ -39,6 +39,39 @@ st.markdown(
             color: white !important;
         }}
 
+        /* Campos de texto e selects */
+        div[data-baseweb="input"] input,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] span,
+        textarea,
+        input {{
+            background-color: #111111 !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            border: 1px solid #404040 !important;
+            border-radius: 10px !important;
+        }}
+
+        /* Dropdown aberto */
+        div[data-baseweb="popover"],
+        div[data-baseweb="menu"],
+        ul[role="listbox"],
+        li[role="option"] {{
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }}
+
+        li[role="option"] div,
+        li[role="option"] span {{
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+        }}
+
+        div[data-baseweb="tag"] {{
+            background-color: {DEFERA_RED} !important;
+            color: white !important;
+        }}
+
         .stButton > button {{
             width: 100%;
             border-radius: 13px;
@@ -106,10 +139,12 @@ st.markdown(
         }}
 
         .athlete-grid .stButton > button {{
-            min-height: 2.65rem !important;
-            padding: 0.20rem !important;
-            font-size: 0.95rem !important;
-            border-radius: 14px !important;
+            min-height: 2.15rem !important;
+            padding: 0.10rem 0.12rem !important;
+            font-size: 0.78rem !important;
+            border-radius: 11px !important;
+            line-height: 1.05 !important;
+            white-space: normal !important;
         }}
 
         .action-grid .stButton > button {{
@@ -128,8 +163,9 @@ st.markdown(
             }}
 
             .athlete-grid .stButton > button {{
-                min-height: 2.35rem !important;
-                font-size: 0.82rem !important;
+                min-height: 2.05rem !important;
+                font-size: 0.70rem !important;
+                padding: 0.08rem !important;
             }}
 
             .action-grid .stButton > button {{
@@ -428,7 +464,6 @@ def criar_delta(categoria, detalhe="", zona="", resultado=""):
 
     elif categoria in ["Remate", "Remate GR"]:
         inc("remates_total")
-
         zona_map = {
             "6m": "remates_6m",
             "9m": "remates_9m",
@@ -599,11 +634,6 @@ def exportar_excel_bytes(momento_exportacao="Final"):
 # =========================================================
 # MODAL DE REGISTO
 # =========================================================
-def render_action_button(label, key, on_click):
-    if st.button(label, key=key, use_container_width=True):
-        on_click()
-
-
 def render_buttons(options, prefix, n_cols=2, on_pick=None):
     st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
     for i in range(0, len(options), n_cols):
@@ -682,7 +712,6 @@ def modal_registo():
         st.session_state.modal_resultado = None
         st.rerun()
 
-    # JOGADOR DE CAMPO
     if not jogador["gr"]:
         if acao == "Remate":
             if st.session_state.modal_zona is None:
@@ -729,7 +758,6 @@ def modal_registo():
         )
         return
 
-    # GUARDA-REDES
     if jogador["gr"]:
         if acao in ["Defesa", "Golo Sofrido"]:
             if st.session_state.modal_zona is None:
@@ -909,9 +937,9 @@ campo = [j for j in convocados if not j["gr"]]
 
 if grs:
     st.markdown("#### Guarda-redes")
-    cols_gr = st.columns(4)
+    cols_gr = st.columns(2)
     for idx, jogador in enumerate(grs):
-        with cols_gr[idx % 4]:
+        with cols_gr[idx % 2]:
             if st.button(f"🧤 {jogador['numero']} · {jogador['nome']}", key=f"gr_{jogador['numero']}", use_container_width=True):
                 st.session_state.modal_jogador_num = jogador["numero"]
                 st.session_state.modal_acao = None
@@ -919,9 +947,9 @@ if grs:
                 st.rerun()
 
 st.markdown("#### Jogadores de campo")
-cols = st.columns(4)
+cols = st.columns(2)
 for idx, jogador in enumerate(campo):
-    with cols[idx % 4]:
+    with cols[idx % 2]:
         if st.button(f"{jogador['numero']} · {jogador['nome']}", key=f"campo_{jogador['numero']}", use_container_width=True):
             st.session_state.modal_jogador_num = jogador["numero"]
             st.session_state.modal_acao = None
@@ -930,7 +958,6 @@ for idx, jogador in enumerate(campo):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# abrir modal se houver atleta selecionado
 if st.session_state.modal_jogador_num is not None:
     modal_registo()
 
