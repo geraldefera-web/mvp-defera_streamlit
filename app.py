@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 import streamlit as st
@@ -13,8 +13,6 @@ st.set_page_config(page_title="DEFERA Stats Live", layout="wide")
 # =========================================================
 DEFERA_RED = "#D40000"
 DEFERA_BLACK = "#070707"
-DEFERA_DARK = "#111111"
-DEFERA_GREY = "#2A2A2A"
 DEFERA_PANEL = "#151515"
 DEFERA_PANEL_2 = "#1D1D1D"
 DEFERA_BORDER = "#303030"
@@ -41,66 +39,30 @@ st.markdown(
             color: white !important;
         }}
 
-        h1 {{
-            font-size: 2rem !important;
-            letter-spacing: 0.3px;
-            margin-bottom: 0.1rem !important;
-        }}
-
-        div[data-baseweb="input"] > div,
-        div[data-baseweb="select"] > div,
-        textarea,
-        input {{
-            background: #101010 !important;
-            color: white !important;
-            border: 1px solid #404040 !important;
-            -webkit-text-fill-color: white !important;
-            border-radius: 10px !important;
-        }}
-
-        div[data-baseweb="select"] span {{
-            color: white !important;
-        }}
-
-        div[data-baseweb="tag"] {{
-            background-color: {DEFERA_RED} !important;
-            color: white !important;
-        }}
-
-        div[role="listbox"],
-        ul[role="listbox"] {{
-            background: #f2f2f2 !important;
-        }}
-
-        li[role="option"], li[role="option"] * {{
-            color: black !important;
-        }}
-
         .stButton > button {{
             width: 100%;
-            border-radius: 12px;
+            border-radius: 13px;
             border: 1px solid {DEFERA_RED};
             background: linear-gradient(180deg, {DEFERA_RED} 0%, #b30000 100%);
             color: white !important;
-            font-weight: 700;
-            min-height: 2.3rem;
+            font-weight: 800;
+            min-height: 2.6rem;
             box-shadow: none !important;
         }}
 
         .stButton > button:hover {{
             background: linear-gradient(180deg, #b30000 0%, #980000 100%);
             border-color: #b30000;
-            color: white !important;
         }}
 
         .stDownloadButton > button {{
             width: 100%;
-            border-radius: 12px;
+            border-radius: 13px;
             border: 1px solid {DEFERA_RED};
             background: linear-gradient(180deg, {DEFERA_RED} 0%, #b30000 100%);
             color: white !important;
-            font-weight: 700;
-            min-height: 2.3rem;
+            font-weight: 800;
+            min-height: 2.6rem;
         }}
 
         div[data-testid="stMetric"] {{
@@ -132,7 +94,7 @@ st.markdown(
             border-radius: 14px;
             padding: 10px 12px;
             margin-bottom: 10px;
-            font-weight: 700;
+            font-weight: 800;
         }}
 
         .section-card {{
@@ -143,43 +105,19 @@ st.markdown(
             margin-bottom: 12px;
         }}
 
-        .mini-caption {{
-            font-size: 0.74rem;
-            opacity: 0.78;
-            margin-bottom: 6px;
-        }}
-
         .athlete-grid .stButton > button {{
-            min-height: 2.5rem !important;
+            min-height: 2.65rem !important;
             padding: 0.20rem !important;
             font-size: 0.95rem !important;
             border-radius: 14px !important;
         }}
 
         .action-grid .stButton > button {{
-            min-height: 2.35rem !important;
+            min-height: 2.65rem !important;
             padding: 0.16rem 0.18rem !important;
-            font-size: 0.72rem !important;
+            font-size: 0.82rem !important;
             border-radius: 12px !important;
             line-height: 1.05 !important;
-            white-space: normal !important;
-        }}
-
-        .zone-grid .stButton > button {{
-            min-height: 4.2rem !important;
-            padding: 0.18rem 0.10rem !important;
-            font-size: 0.53rem !important;
-            border-radius: 12px !important;
-            line-height: 1.0 !important;
-            white-space: pre-line !important;
-        }}
-
-        .source-zone-grid .stButton > button {{
-            min-height: 2.5rem !important;
-            padding: 0.14rem 0.10rem !important;
-            font-size: 0.68rem !important;
-            border-radius: 12px !important;
-            line-height: 1.0 !important;
             white-space: normal !important;
         }}
 
@@ -189,31 +127,15 @@ st.markdown(
                 padding-right: 0.38rem;
             }}
 
-            h1 {{
-                font-size: 1.75rem !important;
-            }}
-
             .athlete-grid .stButton > button {{
-                min-height: 2.2rem !important;
-                font-size: 0.86rem !important;
+                min-height: 2.35rem !important;
+                font-size: 0.82rem !important;
             }}
 
             .action-grid .stButton > button {{
-                min-height: 2.05rem !important;
-                font-size: 0.64rem !important;
-                padding: 0.12rem 0.12rem !important;
-            }}
-
-            .zone-grid .stButton > button {{
-                min-height: 4.05rem !important;
-                font-size: 0.47rem !important;
-                padding: 0.12rem 0.05rem !important;
-            }}
-
-            .source-zone-grid .stButton > button {{
-                min-height: 2.3rem !important;
-                font-size: 0.62rem !important;
-                padding: 0.12rem 0.08rem !important;
+                min-height: 2.25rem !important;
+                font-size: 0.70rem !important;
+                padding: 0.12rem 0.10rem !important;
             }}
         }}
     </style>
@@ -276,64 +198,52 @@ EQUIPAS = {
     ],
 }
 
-ACOES_RAPIDAS = [
-    "Assistência ao Ponta",
-    "Defesa do Guarda redes",
-    "Golo Marcado",
-    "Assistência para golo",
-    "Assistência ao Pivô",
-    "Cartão Amarelo",
-    "Cartão Vermelho",
-    "Suspensão dois minutos",
-    "Bola/remate Bloqueado",
-    "Desarme",
-    "Remate interceptado",
-    "Remate",
-    "Perda de bola",
-    "7 metros ganho",
-    "Falta técnica",
-    "Golo sofrido",
-]
-
-TIPOS_REMATE = [
-    "6 metros",
-    "9 metros",
-    "7 metros",
-    "Ponta",
-    "Pivô",
-    "Contra-ataque",
-]
-
-RESULTADOS_REMATE = [
-    "Golo",
-    "Falhado",
-    "Defesa GR",
-    "Poste",
-]
-
-ZONAS_ORIGEM_REMATE = [
-    "6 metros",
-    "9 metros",
-    "7 metros",
-    "Ponta",
-    "Pivô",
-    "Contra-ataque",
-]
-
-ZONAS_BALIZA = {
-    1: "Canto Superior Esquerdo",
-    2: "Centro Superior",
-    3: "Canto Superior Direito",
-    4: "Meio Esquerda",
-    5: "Meio Centro",
-    6: "Meio Direita",
-    7: "Canto Inferior Esquerdo",
-    8: "Centro Inferior",
-    9: "Canto Inferior Direito",
-}
-
 MAX_CONVOCADOS = 16
 BACKUP_FILE = "/tmp/defera_stats_live_backup.json"
+
+CAMPO_ACOES = {
+    "Assistência": ["Ponta", "Pivot"],
+    "Disciplina": ["Amarelo", "Vermelho", "2 min", "Azul"],
+    "Defesa": ["Interceção", "Bloco", "Desarme"],
+    "Falta Técnica": ["Passos", "Dribles", "Receção", "Passe", "Atacante"],
+    "7 Metros Ganho": ["Registar"],
+    "Remate": ["6m", "9m", "7m", "Ponta", "Contra-ataque", "Transição", "Sem GR"],
+}
+
+RESULTADOS_REMATE_CAMPO = ["Golo", "Fora", "Defesa GR", "Poste", "Bloco"]
+
+GR_ACOES = {
+    "Defesa": ["6m", "9m", "7m", "Ponta", "Pivô", "Contra-ataque", "Transição"],
+    "Golo Sofrido": ["6m", "9m", "7m", "Ponta", "Pivô", "Contra-ataque", "Transição"],
+    "Remate": ["Golo", "Poste", "Falhado", "Defesa GR"],
+    "Assistência": ["Contra-ataque"],
+    "Falta Técnica": ["Passe"],
+    "Disciplina": ["Amarelo", "Vermelho", "2 min", "Azul"],
+}
+
+ZONAS_BALIZA = {
+    1: "Superior Esquerdo",
+    2: "Superior Centro",
+    3: "Superior Direito",
+    4: "Médio Esquerdo",
+    5: "Médio Centro",
+    6: "Médio Direito",
+    7: "Inferior Esquerdo",
+    8: "Inferior Centro",
+    9: "Inferior Direito",
+}
+
+STAT_KEYS = [
+    "assist_ponta", "assist_pivot", "assist_golo", "assist_contra_ataque",
+    "cartoes_amarelos", "cartoes_vermelhos", "suspensoes_2min", "cartoes_azuis",
+    "defesas_intercecao", "defesas_bloco", "defesas_desarme", "defesas_gr",
+    "faltas_passos", "faltas_dribles", "faltas_rececao", "faltas_passe", "faltas_atacante", "faltas_tecnicas",
+    "ganhou_7m",
+    "remates_total", "remates_6m", "remates_9m", "remates_7m", "remates_ponta",
+    "remates_pivot", "remates_contra_ataque", "remates_transicao", "remates_sem_gr",
+    "remates_golo", "remates_fora", "remates_defesa_gr", "remates_poste", "remates_bloco",
+    "golos_marcados", "golos_sofridos", "golos_sofridos_baliza_aberta",
+]
 
 # =========================================================
 # ESTADO
@@ -348,7 +258,6 @@ def init_state():
         "local_jogo": "",
         "data_jogo": date.today().strftime("%d/%m/%Y"),
         "convocados_ids": [],
-        "selecionado_id": None,
         "eventos_log": [],
         "stats": {},
         "resultado_cd_xico": 0,
@@ -358,12 +267,11 @@ def init_state():
         "observacoes": "",
         "ultima_acao_anulada": "",
         "ultima_acao_registada": "",
-        "acao_atual": None,
-        "resultado_defesa_gr_atual": None,
-        "tipo_remate_atual": None,
-        "resultado_remate_atual": None,
-        "zona_origem_gr_atual": None,
-        "zona_baliza_atual": None,
+        "modal_jogador_num": None,
+        "modal_acao": None,
+        "modal_detalhe": None,
+        "modal_zona": None,
+        "modal_resultado": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -372,30 +280,11 @@ def init_state():
 
 def snapshot_state():
     keys = [
-        "jogo_iniciado",
-        "parte",
-        "equipa",
-        "adversario",
-        "competicao",
-        "local_jogo",
-        "data_jogo",
-        "convocados_ids",
-        "selecionado_id",
-        "eventos_log",
-        "stats",
-        "resultado_cd_xico",
-        "resultado_adversario",
-        "resultado_intervalo_cd_xico",
-        "resultado_intervalo_adversario",
-        "observacoes",
-        "ultima_acao_anulada",
-        "ultima_acao_registada",
-        "acao_atual",
-        "resultado_defesa_gr_atual",
-        "tipo_remate_atual",
-        "resultado_remate_atual",
-        "zona_origem_gr_atual",
-        "zona_baliza_atual",
+        "jogo_iniciado", "parte", "equipa", "adversario", "competicao", "local_jogo",
+        "data_jogo", "convocados_ids", "eventos_log", "stats",
+        "resultado_cd_xico", "resultado_adversario",
+        "resultado_intervalo_cd_xico", "resultado_intervalo_adversario",
+        "observacoes", "ultima_acao_anulada", "ultima_acao_registada",
     ]
     return {k: st.session_state.get(k) for k in keys}
 
@@ -440,14 +329,12 @@ def reset_jogo():
     init_state()
 
 
-def limpar_fluxo_acao():
-    st.session_state.acao_atual = None
-    st.session_state.resultado_defesa_gr_atual = None
-    st.session_state.tipo_remate_atual = None
-    st.session_state.resultado_remate_atual = None
-    st.session_state.zona_origem_gr_atual = None
-    st.session_state.zona_baliza_atual = None
-    save_backup()
+def reset_modal():
+    st.session_state.modal_jogador_num = None
+    st.session_state.modal_acao = None
+    st.session_state.modal_detalhe = None
+    st.session_state.modal_zona = None
+    st.session_state.modal_resultado = None
 
 
 def get_plantel(equipa_nome):
@@ -468,11 +355,6 @@ def get_player_by_num(numero):
     return None
 
 
-def atleta_selecionado_e_gr():
-    jogador = get_player_by_num(st.session_state.selecionado_id)
-    return jogador["gr"] if jogador else False
-
-
 def ensure_player_stats(jogador):
     pid = jogador["numero"]
     if pid not in st.session_state.stats:
@@ -480,202 +362,156 @@ def ensure_player_stats(jogador):
             "numero_camisola": jogador["numero"],
             "atleta": jogador["nome"],
             "gr": jogador["gr"],
-            "assist_ponta": 0,
-            "defesas_gr": 0,
-            "golos_marcados": 0,
-            "assist_golo": 0,
-            "assist_pivo": 0,
-            "cartoes_amarelos": 0,
-            "cartoes_vermelhos": 0,
-            "suspensoes_2min": 0,
-            "bolas_bloqueadas": 0,
-            "desarmes": 0,
-            "remates_interceptados": 0,
-            "perdas_bola": 0,
-            "ganhou_7m": 0,
-            "faltas_tecnicas": 0,
-            "golos_sofridos": 0,
-            "remates_total": 0,
-            "remates_6m": 0,
-            "remates_9m": 0,
-            "remates_7m": 0,
-            "remates_ponta": 0,
-            "remates_pivo": 0,
-            "remates_contra_ataque": 0,
-            "remates_golo": 0,
-            "remates_falhados": 0,
-            "remates_defesa_gr": 0,
-            "remates_poste": 0,
         }
+        for key in STAT_KEYS:
+            st.session_state.stats[pid][key] = 0
 
 
-def registar_acao_simples(acao):
-    numero = st.session_state.selecionado_id
-    jogador = get_player_by_num(numero)
-    if not jogador:
+def apply_stats_delta(jogador, delta):
+    if not jogador or not delta:
         return
-
     ensure_player_stats(jogador)
-    s = st.session_state.stats[numero]
+    for key, value in delta.items():
+        st.session_state.stats[jogador["numero"]][key] += value
+        if st.session_state.stats[jogador["numero"]][key] < 0:
+            st.session_state.stats[jogador["numero"]][key] = 0
 
-    mapa = {
-        "Assistência ao Ponta": "assist_ponta",
-        "Golo Marcado": "golos_marcados",
-        "Assistência para golo": "assist_golo",
-        "Assistência ao Pivô": "assist_pivo",
-        "Cartão Amarelo": "cartoes_amarelos",
-        "Cartão Vermelho": "cartoes_vermelhos",
-        "Suspensão dois minutos": "suspensoes_2min",
-        "Bola/remate Bloqueado": "bolas_bloqueadas",
-        "Desarme": "desarmes",
-        "Remate interceptado": "remates_interceptados",
-        "Perda de bola": "perdas_bola",
-        "7 metros ganho": "ganhou_7m",
-        "Falta técnica": "faltas_tecnicas",
-        "Golo sofrido": "golos_sofridos",
+
+def criar_delta(categoria, detalhe="", zona="", resultado=""):
+    delta = {}
+
+    def inc(key):
+        delta[key] = delta.get(key, 0) + 1
+
+    if categoria == "Assistência":
+        if detalhe == "Ponta":
+            inc("assist_ponta")
+        elif detalhe == "Pivot":
+            inc("assist_pivot")
+        elif detalhe == "Contra-ataque":
+            inc("assist_contra_ataque")
+        inc("assist_golo")
+
+    elif categoria == "Disciplina":
+        if detalhe == "Amarelo":
+            inc("cartoes_amarelos")
+        elif detalhe == "Vermelho":
+            inc("cartoes_vermelhos")
+        elif detalhe == "2 min":
+            inc("suspensoes_2min")
+        elif detalhe == "Azul":
+            inc("cartoes_azuis")
+
+    elif categoria == "Defesa":
+        if detalhe == "Interceção":
+            inc("defesas_intercecao")
+        elif detalhe == "Bloco":
+            inc("defesas_bloco")
+        elif detalhe == "Desarme":
+            inc("defesas_desarme")
+
+    elif categoria == "Falta Técnica":
+        inc("faltas_tecnicas")
+        if detalhe == "Passos":
+            inc("faltas_passos")
+        elif detalhe == "Dribles":
+            inc("faltas_dribles")
+        elif detalhe == "Receção":
+            inc("faltas_rececao")
+        elif detalhe == "Passe":
+            inc("faltas_passe")
+        elif detalhe == "Atacante":
+            inc("faltas_atacante")
+
+    elif categoria == "7 Metros Ganho":
+        inc("ganhou_7m")
+
+    elif categoria in ["Remate", "Remate GR"]:
+        inc("remates_total")
+
+        zona_map = {
+            "6m": "remates_6m",
+            "9m": "remates_9m",
+            "7m": "remates_7m",
+            "Ponta": "remates_ponta",
+            "Pivô": "remates_pivot",
+            "Pivot": "remates_pivot",
+            "Contra-ataque": "remates_contra_ataque",
+            "Transição": "remates_transicao",
+            "Sem GR": "remates_sem_gr",
+        }
+        if zona in zona_map:
+            inc(zona_map[zona])
+
+        if resultado == "Golo":
+            inc("remates_golo")
+            inc("golos_marcados")
+        elif resultado in ["Fora", "Falhado"]:
+            inc("remates_fora")
+        elif resultado == "Defesa GR":
+            inc("remates_defesa_gr")
+        elif resultado == "Poste":
+            inc("remates_poste")
+        elif resultado == "Bloco":
+            inc("remates_bloco")
+
+    elif categoria == "Defesa GR":
+        inc("defesas_gr")
+
+    elif categoria == "Golo Sofrido":
+        inc("golos_sofridos")
+
+    elif categoria == "Golo Sofrido Baliza Aberta":
+        inc("golos_sofridos_baliza_aberta")
+
+    return delta
+
+
+def registar_evento(jogador, categoria, detalhe="", zona="", resultado="", posicao_baliza=""):
+    score_home_delta = 0
+    score_away_delta = 0
+
+    if categoria in ["Remate", "Remate GR"] and resultado == "Golo":
+        score_home_delta = 1
+
+    if categoria in ["Golo Sofrido", "Golo Sofrido Baliza Aberta"]:
+        score_away_delta = 1
+
+    stats_delta = criar_delta(categoria, detalhe, zona, resultado)
+
+    if jogador:
+        ensure_player_stats(jogador)
+        apply_stats_delta(jogador, stats_delta)
+
+    st.session_state.resultado_cd_xico += score_home_delta
+    st.session_state.resultado_adversario += score_away_delta
+
+    evento = {
+        "hora": datetime.now().strftime("%H:%M:%S"),
+        "parte": st.session_state.parte,
+        "numero_camisola": jogador["numero"] if jogador else "",
+        "atleta": jogador["nome"] if jogador else "Sem atleta",
+        "gr": jogador["gr"] if jogador else "",
+        "categoria": categoria,
+        "detalhe": detalhe,
+        "zona": zona,
+        "resultado": resultado,
+        "posicao_baliza": posicao_baliza,
+        "score_home_delta": score_home_delta,
+        "score_away_delta": score_away_delta,
+        "stats_delta": stats_delta,
     }
 
-    campo = mapa.get(acao)
-    if campo:
-        s[campo] += 1
+    st.session_state.eventos_log.append(evento)
 
-    st.session_state.eventos_log.append(
-        {
-            "parte": st.session_state.parte,
-            "numero_camisola": jogador["numero"],
-            "atleta": jogador["nome"],
-            "acao_principal": acao,
-            "resultado_defesa_gr": "",
-            "tipo_remate": "",
-            "resultado_remate": "",
-            "zona_origem_gr": "",
-            "zona_baliza": "",
-            "zona_baliza_label": "",
-        }
-    )
-
-    st.session_state.ultima_acao_registada = f"{jogador['numero']} · {jogador['nome']} → {acao}"
+    nome = f"{jogador['numero']} · {jogador['nome']}" if jogador else "Sem atleta"
+    extra = " / ".join([x for x in [categoria, detalhe, zona, resultado, posicao_baliza] if x])
+    st.session_state.ultima_acao_registada = f"{nome} → {extra}"
     st.session_state.ultima_acao_anulada = ""
+
+    reset_modal()
     save_backup()
-    limpar_fluxo_acao()
-
-
-def confirmar_defesa_gr():
-    numero = st.session_state.selecionado_id
-    jogador = get_player_by_num(numero)
-    if not jogador:
-        return
-
-    resultado = st.session_state.resultado_defesa_gr_atual
-    origem = st.session_state.zona_origem_gr_atual
-    zona = st.session_state.zona_baliza_atual
-
-    if resultado is None or origem is None or zona is None:
-        return
-
-    ensure_player_stats(jogador)
-    s = st.session_state.stats[numero]
-
-    if resultado == "Defendeu":
-        s["defesas_gr"] += 1
-    else:
-        s["golos_sofridos"] += 1
-
-    st.session_state.eventos_log.append(
-        {
-            "parte": st.session_state.parte,
-            "numero_camisola": jogador["numero"],
-            "atleta": jogador["nome"],
-            "acao_principal": "Defesa do Guarda redes",
-            "resultado_defesa_gr": resultado,
-            "tipo_remate": "",
-            "resultado_remate": "",
-            "zona_origem_gr": origem,
-            "zona_baliza": zona,
-            "zona_baliza_label": ZONAS_BALIZA.get(zona, ""),
-        }
-    )
-
-    extra = f" / Origem {origem} / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}"
-    st.session_state.ultima_acao_registada = (
-        f"{jogador['numero']} · {jogador['nome']} → Defesa do Guarda redes / {resultado}{extra}"
-    )
-    st.session_state.ultima_acao_anulada = ""
-    save_backup()
-    limpar_fluxo_acao()
-
-
-def mapear_tipo_remate(tipo):
-    mapa = {
-        "6 metros": "remates_6m",
-        "9 metros": "remates_9m",
-        "7 metros": "remates_7m",
-        "Ponta": "remates_ponta",
-        "Pivô": "remates_pivo",
-        "Contra-ataque": "remates_contra_ataque",
-    }
-    return mapa.get(tipo)
-
-
-def confirmar_remate():
-    numero = st.session_state.selecionado_id
-    jogador = get_player_by_num(numero)
-    if not jogador:
-        return
-
-    tipo = st.session_state.tipo_remate_atual
-    resultado = st.session_state.resultado_remate_atual
-    zona = st.session_state.zona_baliza_atual
-
-    if not tipo or not resultado:
-        return
-
-    if resultado == "Defesa GR" and zona is None:
-        return
-
-    if resultado != "Defesa GR":
-        zona = None
-
-    ensure_player_stats(jogador)
-    s = st.session_state.stats[numero]
-
-    s["remates_total"] += 1
-
-    campo_tipo = mapear_tipo_remate(tipo)
-    if campo_tipo:
-        s[campo_tipo] += 1
-
-    if resultado == "Golo":
-        s["remates_golo"] += 1
-    elif resultado == "Falhado":
-        s["remates_falhados"] += 1
-    elif resultado == "Defesa GR":
-        s["remates_defesa_gr"] += 1
-    elif resultado == "Poste":
-        s["remates_poste"] += 1
-
-    st.session_state.eventos_log.append(
-        {
-            "parte": st.session_state.parte,
-            "numero_camisola": jogador["numero"],
-            "atleta": jogador["nome"],
-            "acao_principal": "Remate",
-            "resultado_defesa_gr": "",
-            "tipo_remate": tipo,
-            "resultado_remate": resultado,
-            "zona_origem_gr": "",
-            "zona_baliza": zona if zona is not None else "",
-            "zona_baliza_label": ZONAS_BALIZA.get(zona, "") if zona is not None else "",
-        }
-    )
-
-    extra = f" / Zona {zona} - {ZONAS_BALIZA.get(zona, '')}" if zona is not None else ""
-    st.session_state.ultima_acao_registada = (
-        f"{jogador['numero']} · {jogador['nome']} → Remate / {tipo} / {resultado}{extra}"
-    )
-    st.session_state.ultima_acao_anulada = ""
-    save_backup()
-    limpar_fluxo_acao()
+    st.rerun()
 
 
 def anular_ultima_acao():
@@ -684,171 +520,27 @@ def anular_ultima_acao():
         return
 
     ultimo = st.session_state.eventos_log.pop()
-    numero = ultimo["numero_camisola"]
-    jogador = get_player_by_num(numero)
-    if not jogador:
-        st.session_state.ultima_acao_anulada = "Última ação anulada."
-        return
+    numero = ultimo.get("numero_camisola")
+    jogador = get_player_by_num(numero) if numero != "" else None
 
-    ensure_player_stats(jogador)
-    s = st.session_state.stats[numero]
+    if jogador:
+        delta = ultimo.get("stats_delta", {})
+        reverse_delta = {k: -v for k, v in delta.items()}
+        apply_stats_delta(jogador, reverse_delta)
 
-    acao = ultimo["acao_principal"]
+    st.session_state.resultado_cd_xico = max(0, st.session_state.resultado_cd_xico - int(ultimo.get("score_home_delta", 0)))
+    st.session_state.resultado_adversario = max(0, st.session_state.resultado_adversario - int(ultimo.get("score_away_delta", 0)))
 
-    mapa = {
-        "Assistência ao Ponta": "assist_ponta",
-        "Golo Marcado": "golos_marcados",
-        "Assistência para golo": "assist_golo",
-        "Assistência ao Pivô": "assist_pivo",
-        "Cartão Amarelo": "cartoes_amarelos",
-        "Cartão Vermelho": "cartoes_vermelhos",
-        "Suspensão dois minutos": "suspensoes_2min",
-        "Bola/remate Bloqueado": "bolas_bloqueadas",
-        "Desarme": "desarmes",
-        "Remate interceptado": "remates_interceptados",
-        "Perda de bola": "perdas_bola",
-        "7 metros ganho": "ganhou_7m",
-        "Falta técnica": "faltas_tecnicas",
-        "Golo sofrido": "golos_sofridos",
-    }
-
-    if acao == "Defesa do Guarda redes":
-        if ultimo["resultado_defesa_gr"] == "Defendeu":
-            if s["defesas_gr"] > 0:
-                s["defesas_gr"] -= 1
-        else:
-            if s["golos_sofridos"] > 0:
-                s["golos_sofridos"] -= 1
-
-        extra = f" / Origem {ultimo['zona_origem_gr']} / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
-        st.session_state.ultima_acao_anulada = (
-            f"Ação anulada: {numero} · {ultimo['atleta']} → Defesa do Guarda redes / "
-            f"{ultimo['resultado_defesa_gr']}{extra}"
-        )
-        st.session_state.ultima_acao_registada = ""
-        save_backup()
-        limpar_fluxo_acao()
-        return
-
-    if acao == "Remate":
-        tipo = ultimo["tipo_remate"]
-        resultado = ultimo["resultado_remate"]
-
-        if s["remates_total"] > 0:
-            s["remates_total"] -= 1
-
-        campo_tipo = mapear_tipo_remate(tipo)
-        if campo_tipo and s[campo_tipo] > 0:
-            s[campo_tipo] -= 1
-
-        if resultado == "Golo" and s["remates_golo"] > 0:
-            s["remates_golo"] -= 1
-        elif resultado == "Falhado" and s["remates_falhados"] > 0:
-            s["remates_falhados"] -= 1
-        elif resultado == "Defesa GR" and s["remates_defesa_gr"] > 0:
-            s["remates_defesa_gr"] -= 1
-        elif resultado == "Poste" and s["remates_poste"] > 0:
-            s["remates_poste"] -= 1
-
-        extra = (
-            f" / Zona {ultimo['zona_baliza']} - {ultimo['zona_baliza_label']}"
-            if ultimo["zona_baliza"] != ""
-            else ""
-        )
-        st.session_state.ultima_acao_anulada = (
-            f"Ação anulada: {numero} · {ultimo['atleta']} → Remate / "
-            f"{ultimo['tipo_remate']} / {ultimo['resultado_remate']}{extra}"
-        )
-        st.session_state.ultima_acao_registada = ""
-        save_backup()
-        limpar_fluxo_acao()
-        return
-
-    campo = mapa.get(acao)
-    if campo and s[campo] > 0:
-        s[campo] -= 1
-
-    st.session_state.ultima_acao_anulada = f"Ação anulada: {numero} · {ultimo['atleta']} → {acao}"
+    st.session_state.ultima_acao_anulada = f"Ação anulada: {ultimo.get('atleta')} → {ultimo.get('categoria')}"
     st.session_state.ultima_acao_registada = ""
+
+    reset_modal()
     save_backup()
-    limpar_fluxo_acao()
+    st.rerun()
 
 
 # =========================================================
-# RENDER GRELHAS
-# =========================================================
-def render_grelha_atletas_numeros(jogadores, n_cols=4):
-    for i in range(0, len(jogadores), n_cols):
-        cols = st.columns(n_cols)
-        bloco = jogadores[i:i + n_cols]
-        for idx, j in enumerate(bloco):
-            selecionado = st.session_state.selecionado_id == j["numero"]
-            label = f"✅ {j['numero']}" if selecionado else str(j["numero"])
-            with cols[idx]:
-                if st.button(label, key=f"atleta_{j['numero']}", use_container_width=True):
-                    st.session_state.selecionado_id = j["numero"]
-                    save_backup()
-                    limpar_fluxo_acao()
-                    st.rerun()
-
-
-def render_grelha_acoes_rapidas(itens, n_cols=2):
-    for i in range(0, len(itens), n_cols):
-        cols = st.columns(n_cols)
-        bloco = itens[i:i + n_cols]
-        for idx, item in enumerate(bloco):
-            selecionado = st.session_state.acao_atual == item
-            label = f"✅ {item}" if selecionado else item
-            with cols[idx]:
-                if st.button(label, key=f"acao_{item}", use_container_width=True):
-                    st.session_state.acao_atual = item
-                    st.session_state.resultado_defesa_gr_atual = None
-                    st.session_state.tipo_remate_atual = None
-                    st.session_state.resultado_remate_atual = None
-                    st.session_state.zona_origem_gr_atual = None
-                    st.session_state.zona_baliza_atual = None
-                    save_backup()
-
-                    if item in ["Defesa do Guarda redes", "Remate"]:
-                        st.rerun()
-                    else:
-                        registar_acao_simples(item)
-                        st.rerun()
-
-
-def render_grelha_lista_botoes(itens, chave_estado, prefixo, n_cols=2):
-    for i in range(0, len(itens), n_cols):
-        cols = st.columns(n_cols)
-        bloco = itens[i:i + n_cols]
-        for idx, item in enumerate(bloco):
-            selecionado = st.session_state[chave_estado] == item
-            label = f"✅ {item}" if selecionado else item
-            with cols[idx]:
-                if st.button(label, key=f"{prefixo}_{item}", use_container_width=True):
-                    st.session_state[chave_estado] = item
-                    save_backup()
-                    st.rerun()
-
-
-def render_grelha_zonas():
-    zonas = list(ZONAS_BALIZA.keys())
-    idx = 0
-    for _ in range(3):
-        cols = st.columns(3)
-        for c in cols:
-            zona = zonas[idx]
-            selecionado = st.session_state.zona_baliza_atual == zona
-            label = f"✅ {zona}\n{ZONAS_BALIZA[zona]}" if selecionado else f"{zona}\n{ZONAS_BALIZA[zona]}"
-            with c:
-                if st.button(label, key=f"zona_{zona}", use_container_width=True):
-                    st.session_state.zona_baliza_atual = zona
-                    save_backup()
-                    st.rerun()
-            idx += 1
-
-
-# =========================================================
-# DATAFRAMES
+# DATAFRAMES / EXPORTAÇÃO
 # =========================================================
 def dataframe_resumo():
     rows = []
@@ -859,55 +551,22 @@ def dataframe_resumo():
     if not rows:
         return pd.DataFrame()
 
-    return pd.DataFrame(rows)[[
-        "numero_camisola",
-        "atleta",
-        "assist_ponta",
-        "defesas_gr",
-        "golos_marcados",
-        "assist_golo",
-        "assist_pivo",
-        "cartoes_amarelos",
-        "cartoes_vermelhos",
-        "suspensoes_2min",
-        "bolas_bloqueadas",
-        "desarmes",
-        "remates_interceptados",
-        "perdas_bola",
-        "ganhou_7m",
-        "faltas_tecnicas",
-        "golos_sofridos",
-        "remates_total",
-        "remates_6m",
-        "remates_9m",
-        "remates_7m",
-        "remates_ponta",
-        "remates_pivo",
-        "remates_contra_ataque",
-        "remates_golo",
-        "remates_falhados",
-        "remates_defesa_gr",
-        "remates_poste",
-    ]].sort_values(["numero_camisola", "atleta"])
+    df = pd.DataFrame(rows)
+    base = ["numero_camisola", "atleta", "gr"]
+    cols = base + STAT_KEYS
+    return df[cols].sort_values(["numero_camisola", "atleta"])
 
 
 def dataframe_eventos():
     if not st.session_state.eventos_log:
-        return pd.DataFrame(
-            columns=[
-                "parte",
-                "numero_camisola",
-                "atleta",
-                "acao_principal",
-                "resultado_defesa_gr",
-                "tipo_remate",
-                "resultado_remate",
-                "zona_origem_gr",
-                "zona_baliza",
-                "zona_baliza_label",
-            ]
-        )
-    return pd.DataFrame(st.session_state.eventos_log)
+        return pd.DataFrame(columns=[
+            "hora", "parte", "numero_camisola", "atleta", "gr", "categoria",
+            "detalhe", "zona", "resultado", "posicao_baliza",
+            "score_home_delta", "score_away_delta"
+        ])
+
+    df = pd.DataFrame(st.session_state.eventos_log)
+    return df.drop(columns=["stats_delta"], errors="ignore")
 
 
 def ficha_jogo_df(momento_exportacao="Final"):
@@ -936,6 +595,190 @@ def exportar_excel_bytes(momento_exportacao="Final"):
     output.seek(0)
     return output.getvalue()
 
+
+# =========================================================
+# MODAL DE REGISTO
+# =========================================================
+def render_action_button(label, key, on_click):
+    if st.button(label, key=key, use_container_width=True):
+        on_click()
+
+
+def render_buttons(options, prefix, n_cols=2, on_pick=None):
+    st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
+    for i in range(0, len(options), n_cols):
+        cols = st.columns(n_cols)
+        for idx, option in enumerate(options[i:i+n_cols]):
+            with cols[idx]:
+                if st.button(option, key=f"{prefix}_{option}", use_container_width=True):
+                    if on_pick:
+                        on_pick(option)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_goal_positions(jogador, categoria, zona):
+    st.markdown("#### Posição na baliza")
+    zonas = list(ZONAS_BALIZA.items())
+
+    for i in range(0, len(zonas), 3):
+        cols = st.columns(3)
+        for idx, (num, label) in enumerate(zonas[i:i+3]):
+            with cols[idx]:
+                if st.button(f"{num}\n{label}", key=f"baliza_{categoria}_{zona}_{num}", use_container_width=True):
+                    resultado = "Golo" if categoria == "Golo Sofrido" else "Defesa GR"
+                    registar_evento(
+                        jogador=jogador,
+                        categoria=categoria,
+                        zona=zona,
+                        resultado=resultado,
+                        posicao_baliza=f"{num} - {label}",
+                    )
+
+
+@st.dialog("Registo rápido")
+def modal_registo():
+    jogador = get_player_by_num(st.session_state.modal_jogador_num)
+
+    if not jogador:
+        st.warning("Atleta não encontrado.")
+        if st.button("Fechar"):
+            reset_modal()
+            st.rerun()
+        return
+
+    st.markdown(f"### {jogador['numero']} · {jogador['nome']} {'🧤' if jogador['gr'] else ''}")
+
+    if st.button("Fechar janela", use_container_width=True):
+        reset_modal()
+        st.rerun()
+
+    st.markdown("---")
+
+    acoes = GR_ACOES if jogador["gr"] else CAMPO_ACOES
+
+    if st.session_state.modal_acao is None:
+        st.markdown("#### Escolher ação")
+        render_buttons(
+            list(acoes.keys()),
+            prefix=f"acao_{jogador['numero']}",
+            n_cols=2,
+            on_pick=lambda acao: (
+                setattr(st.session_state, "modal_acao", acao),
+                setattr(st.session_state, "modal_detalhe", None),
+                setattr(st.session_state, "modal_zona", None),
+                setattr(st.session_state, "modal_resultado", None),
+                st.rerun()
+            )
+        )
+        return
+
+    acao = st.session_state.modal_acao
+    st.markdown(f"#### {acao}")
+
+    if st.button("Voltar às ações", use_container_width=True):
+        st.session_state.modal_acao = None
+        st.session_state.modal_detalhe = None
+        st.session_state.modal_zona = None
+        st.session_state.modal_resultado = None
+        st.rerun()
+
+    # JOGADOR DE CAMPO
+    if not jogador["gr"]:
+        if acao == "Remate":
+            if st.session_state.modal_zona is None:
+                st.markdown("Escolher zona de remate")
+                render_buttons(
+                    CAMPO_ACOES["Remate"],
+                    prefix=f"zona_remate_{jogador['numero']}",
+                    n_cols=2,
+                    on_pick=lambda zona: (
+                        setattr(st.session_state, "modal_zona", zona),
+                        st.rerun()
+                    )
+                )
+                return
+
+            st.markdown(f"Zona: **{st.session_state.modal_zona}**")
+            st.markdown("Escolher resultado")
+            render_buttons(
+                RESULTADOS_REMATE_CAMPO,
+                prefix=f"res_remate_{jogador['numero']}_{st.session_state.modal_zona}",
+                n_cols=2,
+                on_pick=lambda resultado: registar_evento(
+                    jogador=jogador,
+                    categoria="Remate",
+                    zona=st.session_state.modal_zona,
+                    resultado=resultado,
+                )
+            )
+            return
+
+        if acao == "7 Metros Ganho":
+            registar_evento(jogador=jogador, categoria="7 Metros Ganho", detalhe="7 Metros Ganho")
+            return
+
+        render_buttons(
+            CAMPO_ACOES[acao],
+            prefix=f"campo_{jogador['numero']}_{acao}",
+            n_cols=2,
+            on_pick=lambda detalhe: registar_evento(
+                jogador=jogador,
+                categoria=acao,
+                detalhe=detalhe,
+            )
+        )
+        return
+
+    # GUARDA-REDES
+    if jogador["gr"]:
+        if acao in ["Defesa", "Golo Sofrido"]:
+            if st.session_state.modal_zona is None:
+                st.markdown("Escolher zona de origem")
+                render_buttons(
+                    GR_ACOES[acao],
+                    prefix=f"gr_zona_{jogador['numero']}_{acao}",
+                    n_cols=2,
+                    on_pick=lambda zona: (
+                        setattr(st.session_state, "modal_zona", zona),
+                        st.rerun()
+                    )
+                )
+                return
+
+            st.markdown(f"Origem: **{st.session_state.modal_zona}**")
+            render_goal_positions(jogador, "Defesa GR" if acao == "Defesa" else "Golo Sofrido", st.session_state.modal_zona)
+            return
+
+        if acao == "Remate":
+            render_buttons(
+                GR_ACOES["Remate"],
+                prefix=f"gr_remate_{jogador['numero']}",
+                n_cols=2,
+                on_pick=lambda resultado: registar_evento(
+                    jogador=jogador,
+                    categoria="Remate GR",
+                    resultado=resultado,
+                    zona="GR",
+                )
+            )
+            return
+
+        if acao == "Assistência":
+            registar_evento(jogador=jogador, categoria="Assistência", detalhe="Contra-ataque")
+            return
+
+        render_buttons(
+            GR_ACOES[acao],
+            prefix=f"gr_{jogador['numero']}_{acao}",
+            n_cols=2,
+            on_pick=lambda detalhe: registar_evento(
+                jogador=jogador,
+                categoria=acao,
+                detalhe=detalhe,
+            )
+        )
+
+
 # =========================================================
 # RENDER PRINCIPAL
 # =========================================================
@@ -956,7 +799,7 @@ if not st.session_state.jogo_iniciado:
                 st.rerun()
 
 st.title("DEFERA Stats Live")
-st.caption("Modo operacional — números à esquerda e ações à direita.")
+st.caption("Modo rápido — tocar no atleta, escolher ação e registar.")
 
 if not st.session_state.jogo_iniciado:
     st.subheader("Configuração do jogo")
@@ -990,12 +833,14 @@ if not st.session_state.jogo_iniciado:
             st.session_state.local_jogo = local_jogo.strip()
             st.session_state.data_jogo = data_jogo.strip()
             st.session_state.convocados_ids = convocados_ids
-            st.session_state.selecionado_id = sorted(convocados_ids)[0]
             save_backup()
-            limpar_fluxo_acao()
+            reset_modal()
             st.rerun()
     st.stop()
 
+# =========================================================
+# TOPO DO JOGO
+# =========================================================
 m1, m2, m3, m4 = st.columns(4)
 with m1:
     st.metric("Parte", st.session_state.parte)
@@ -1017,10 +862,11 @@ with c1:
         st.session_state.parte = "2.ª Parte"
         save_backup()
         st.rerun()
+
 with c2:
     if st.button("ANULAR ÚLTIMA AÇÃO", use_container_width=True):
         anular_ultima_acao()
-        st.rerun()
+
 with c3:
     st.download_button(
         "Exportar Excel ao intervalo",
@@ -1029,147 +875,68 @@ with c3:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
+
 with c4:
     if st.button("Novo jogo", use_container_width=True):
         reset_jogo()
         st.rerun()
 
+# =========================================================
+# AÇÃO GLOBAL
+# =========================================================
+st.markdown("---")
+g1, g2 = st.columns([1, 3])
+with g1:
+    if st.button("Golo sofrido baliza aberta", use_container_width=True):
+        registar_evento(
+            jogador=None,
+            categoria="Golo Sofrido Baliza Aberta",
+            detalhe="Sem GR",
+            zona="Baliza aberta",
+            resultado="Golo",
+        )
+
+# =========================================================
+# PLANTEL
+# =========================================================
 convocados = get_convocados()
-selecionado = get_player_by_num(st.session_state.selecionado_id)
 
-left, right = st.columns([0.82, 1.38], gap="medium")
+st.markdown("### Atletas")
+st.markdown("<div class='athlete-grid'>", unsafe_allow_html=True)
 
-with left:
-    st.markdown("### Atletas")
-    st.markdown("<div class='mini-caption'>Seleciona apenas o número do atleta</div>", unsafe_allow_html=True)
-    st.markdown("<div class='athlete-grid'>", unsafe_allow_html=True)
-    render_grelha_atletas_numeros(convocados, n_cols=4)
-    st.markdown("</div>", unsafe_allow_html=True)
+grs = [j for j in convocados if j["gr"]]
+campo = [j for j in convocados if not j["gr"]]
 
-    if selecionado:
-        gr_txt = " · GR" if selecionado["gr"] else ""
-        st.markdown(
-            f"<div class='selected-box'>Selecionado — {selecionado['numero']} · {selecionado['nome']}{gr_txt}</div>",
-            unsafe_allow_html=True,
-        )
+if grs:
+    st.markdown("#### Guarda-redes")
+    cols_gr = st.columns(4)
+    for idx, jogador in enumerate(grs):
+        with cols_gr[idx % 4]:
+            if st.button(f"🧤 {jogador['numero']} · {jogador['nome']}", key=f"gr_{jogador['numero']}", use_container_width=True):
+                st.session_state.modal_jogador_num = jogador["numero"]
+                st.session_state.modal_acao = None
+                st.session_state.modal_zona = None
+                st.rerun()
 
-with right:
-    st.markdown("### Registo")
+st.markdown("#### Jogadores de campo")
+cols = st.columns(4)
+for idx, jogador in enumerate(campo):
+    with cols[idx % 4]:
+        if st.button(f"{jogador['numero']} · {jogador['nome']}", key=f"campo_{jogador['numero']}", use_container_width=True):
+            st.session_state.modal_jogador_num = jogador["numero"]
+            st.session_state.modal_acao = None
+            st.session_state.modal_zona = None
+            st.rerun()
 
-    if selecionado:
-        defesa_txt = st.session_state.resultado_defesa_gr_atual or "—"
-        tipo_txt = st.session_state.tipo_remate_atual or "—"
-        resultado_txt = st.session_state.resultado_remate_atual or "—"
-        origem_gr_txt = st.session_state.zona_origem_gr_atual or "—"
-        zona_txt = (
-            f"{st.session_state.zona_baliza_atual} - {ZONAS_BALIZA[st.session_state.zona_baliza_atual]}"
-            if st.session_state.zona_baliza_atual is not None else "—"
-        )
+st.markdown("</div>", unsafe_allow_html=True)
 
-        st.markdown(
-            f"""
-            <div class='selected-box'>
-                Atleta — {selecionado['numero']} · {selecionado['nome']}{' · GR' if selecionado['gr'] else ''}<br>
-                Ação — {st.session_state.acao_atual or '—'} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Defesa — {defesa_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Tipo — {tipo_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Resultado — {resultado_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Origem — {origem_gr_txt} &nbsp;&nbsp;|&nbsp;&nbsp;
-                Baliza — {zona_txt}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+# abrir modal se houver atleta selecionado
+if st.session_state.modal_jogador_num is not None:
+    modal_registo()
 
-        acoes_visiveis = ACOES_RAPIDAS if selecionado["gr"] else [a for a in ACOES_RAPIDAS if a != "Defesa do Guarda redes"]
-
-        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-        st.markdown("**Ações rápidas**")
-        st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-        render_grelha_acoes_rapidas(acoes_visiveis, n_cols=2)
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        if st.session_state.acao_atual == "Defesa do Guarda redes" and selecionado["gr"]:
-            st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-            st.markdown("**Defesa do GR**")
-            st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-            render_grelha_lista_botoes(["Defendeu", "Não defendeu"], "resultado_defesa_gr_atual", "resultado_defesa", n_cols=2)
-            st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            if st.session_state.resultado_defesa_gr_atual is not None:
-                st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-                st.markdown("**Origem do remate**")
-                st.markdown("<div class='source-zone-grid'>", unsafe_allow_html=True)
-                render_grelha_lista_botoes(ZONAS_ORIGEM_REMATE, "zona_origem_gr_atual", "origem_gr", n_cols=2)
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-
-                st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-                st.markdown("**Posição na baliza**")
-                st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
-                render_grelha_zonas()
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            pode_confirmar_defesa = all([
-                st.session_state.selecionado_id is not None,
-                st.session_state.resultado_defesa_gr_atual is not None,
-                st.session_state.zona_origem_gr_atual is not None,
-                st.session_state.zona_baliza_atual is not None,
-            ])
-
-            b1, b2 = st.columns(2)
-            with b1:
-                if st.button("CONFIRMAR DEFESA", use_container_width=True, disabled=not pode_confirmar_defesa):
-                    confirmar_defesa_gr()
-                    st.rerun()
-            with b2:
-                if st.button("LIMPAR SELEÇÃO", use_container_width=True):
-                    limpar_fluxo_acao()
-                    st.rerun()
-
-        if st.session_state.acao_atual == "Remate":
-            st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-            st.markdown("**Tipo de remate**")
-            st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-            render_grelha_lista_botoes(TIPOS_REMATE, "tipo_remate_atual", "tipo_remate", n_cols=2)
-            st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-            st.markdown("**Resultado do remate**")
-            st.markdown("<div class='action-grid'>", unsafe_allow_html=True)
-            render_grelha_lista_botoes(RESULTADOS_REMATE, "resultado_remate_atual", "resultado_remate", n_cols=2)
-            st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            if st.session_state.resultado_remate_atual == "Defesa GR":
-                st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-                st.markdown("**Posição na baliza**")
-                st.markdown("<div class='zone-grid'>", unsafe_allow_html=True)
-                render_grelha_zonas()
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            pode_confirmar_remate = all([
-                st.session_state.selecionado_id is not None,
-                st.session_state.tipo_remate_atual is not None,
-                st.session_state.resultado_remate_atual is not None,
-                (st.session_state.zona_baliza_atual is not None if st.session_state.resultado_remate_atual == "Defesa GR" else True),
-            ])
-
-            b1, b2 = st.columns(2)
-            with b1:
-                if st.button("CONFIRMAR REMATE", use_container_width=True, disabled=not pode_confirmar_remate):
-                    confirmar_remate()
-                    st.rerun()
-            with b2:
-                if st.button("LIMPAR SELEÇÃO ", use_container_width=True):
-                    limpar_fluxo_acao()
-                    st.rerun()
-
+# =========================================================
+# FECHO / RESUMO
+# =========================================================
 with st.expander("Fecho do jogo"):
     r1, r2 = st.columns(2)
     with r1:
@@ -1217,10 +984,9 @@ with st.expander("Fecho do jogo"):
 with st.expander("Resumo estatístico"):
     st.dataframe(dataframe_resumo(), use_container_width=True, hide_index=True)
 
-    if not dataframe_eventos().empty:
-        with st.expander("Ver últimos registos"):
-            st.dataframe(
-                dataframe_eventos().tail(30).iloc[::-1],
-                use_container_width=True,
-                hide_index=True,
-            )
+with st.expander("Últimos registos"):
+    df_eventos = dataframe_eventos()
+    if not df_eventos.empty:
+        st.dataframe(df_eventos.tail(30).iloc[::-1], use_container_width=True, hide_index=True)
+    else:
+        st.info("Ainda não existem ações registadas.")
